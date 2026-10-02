@@ -8,9 +8,8 @@
   :root {
     --sea: #7cc4e4;
     --sea-deep: #4a9cc4;
-    --pan: #e9dcc0;
-    --pan-line: #cdbb94;
-    --cell: #f4ead4;
+    --sand: #f1e2bf;
+    --sand-wet: #b99d6c;
     --ink: #4a3b2a;
     --accent: #e8735a;
     --card: #fffaf0;
@@ -27,98 +26,140 @@
     user-select: none; -webkit-user-select: none;
     overflow: hidden;
   }
-  #app { width: 100%; max-width: 520px; height: 100%; display: flex; flex-direction: column; padding: 12px 16px 16px; gap: 10px; position: relative; }
+  #app { width: 100%; max-width: 520px; height: 100%; display: flex; flex-direction: column; padding: 10px 16px 14px; gap: 8px; position: relative; }
 
   header { display: flex; align-items: center; justify-content: space-between; }
-  h1 { font-size: 22px; margin: 0; letter-spacing: .05em; }
-  h1 small { display: block; font-size: 10px; font-weight: normal; opacity: .6; letter-spacing: .1em; }
-  .sp { background: var(--card); border-radius: 999px; padding: 6px 14px; font-weight: bold; box-shadow: 0 2px 0 #0001; }
-  .sp b { font-size: 20px; color: var(--accent); }
+  h1 { font-size: 20px; margin: 0; letter-spacing: .05em; }
+  h1 small { display: block; font-size: 9px; font-weight: normal; opacity: .6; letter-spacing: .1em; }
+  .sp { background: var(--card); border-radius: 999px; padding: 4px 12px; font-weight: bold; box-shadow: 0 2px 0 #0001; }
+  .sp b { font-size: 18px; color: var(--accent); }
+
+  /* いまの目標 */
+  .goal { background: var(--card); border-radius: 14px; padding: 7px 12px 8px; box-shadow: 0 2px 0 #0001; font-size: 12px; }
+  .goal-ch { font-size: 10px; color: var(--accent); font-weight: bold; }
+  .goal-body { display: flex; justify-content: space-between; gap: 8px; font-weight: bold; margin-top: 1px; }
+  .gbar { height: 5px; background: #0001; border-radius: 3px; margin-top: 4px; overflow: hidden; }
+  .gbar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .5s; }
 
   /* 自給率メーター */
-  .meter { background: var(--card); border-radius: 14px; padding: 8px 12px 10px; box-shadow: 0 2px 0 #0001; }
+  .meter { background: var(--card); border-radius: 14px; padding: 6px 12px 8px; box-shadow: 0 2px 0 #0001; }
   .meter-top { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; }
-  .meter-top b { font-size: 22px; color: var(--self); }
-  .bar { position: relative; height: 14px; background: var(--import); border-radius: 999px; margin-top: 4px; overflow: visible; }
+  .meter-top b { font-size: 18px; color: var(--self); }
+  .bar { position: relative; height: 10px; background: var(--import); border-radius: 999px; margin-top: 3px; }
   .bar .fill { position: absolute; inset: 0 auto 0 0; background: var(--self); border-radius: 999px; transition: width .6s; }
   .bar .jp { position: absolute; left: 10%; top: -3px; bottom: -3px; width: 2px; background: var(--ink); }
-  .bar .jp::after { content: "日本 約10%"; position: absolute; top: 18px; left: -18px; font-size: 9px; white-space: nowrap; opacity: .7; }
-  .meter-legend { display: flex; justify-content: flex-end; gap: 10px; font-size: 10px; margin-top: 4px; opacity: .75; }
+  .meter-legend { display: flex; justify-content: space-between; gap: 10px; font-size: 10px; margin-top: 3px; opacity: .75; }
   .meter-legend i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 3px; vertical-align: 0; }
 
-  /* 海と塩田 */
+  /* 海と砂浜 */
   #stage { flex: 1; display: flex; flex-direction: column; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 0 #0000001a; min-height: 0; position: relative; }
-  .sea { height: 56px; background: linear-gradient(var(--sea), var(--sea-deep)); position: relative; overflow: hidden; flex-shrink: 0; transition: filter 1s; }
+  .sea { height: 64px; background: linear-gradient(var(--sea), var(--sea-deep)); position: relative; overflow: hidden; flex-shrink: 0; cursor: pointer; transition: filter 1s; }
   .sea::before, .sea::after {
     content: ""; position: absolute; left: -50%; width: 200%; height: 20px; bottom: -6px;
-    background: radial-gradient(circle at 10px -4px, transparent 12px, var(--pan) 13px) 0 0 / 26px 20px repeat-x;
+    background: radial-gradient(circle at 10px -4px, transparent 12px, var(--sand) 13px) 0 0 / 26px 20px repeat-x;
     animation: wave 6s linear infinite;
   }
   .sea::after { bottom: 8px; opacity: .25; animation-duration: 9s; animation-direction: reverse; }
   @keyframes wave { to { transform: translateX(26px); } }
-  .weather { position: absolute; left: 10px; top: 6px; z-index: 2; background: #ffffffd0; border-radius: 999px; padding: 3px 10px; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 6px; }
+  .weather { position: absolute; left: 10px; top: 6px; z-index: 2; background: #ffffffd0; border-radius: 999px; padding: 3px 10px; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 6px; }
   .weather .next { font-weight: normal; font-size: 11px; opacity: .7; }
-  .weather .timer { width: 36px; height: 4px; background: #0002; border-radius: 2px; overflow: hidden; }
+  .weather .timer { width: 32px; height: 4px; background: #0002; border-radius: 2px; overflow: hidden; }
   .weather .timer i { display: block; height: 100%; background: var(--ink); opacity: .5; }
-  .sky-icon { position: absolute; right: 14px; top: 4px; font-size: 30px; line-height: 1; z-index: 2; }
+  .sky-icon { position: absolute; right: 14px; top: 4px; font-size: 28px; line-height: 1; z-index: 2; }
+  .sea-label { position: absolute; left: 12px; bottom: 16px; z-index: 2; font-size: 11px; color: #fff; font-weight: bold; text-shadow: 0 1px 2px #0005; }
+  .hanging-teru { position: absolute; right: 52px; top: -4px; width: 30px; z-index: 3; transform-origin: 50% 0; animation: swing 1.6s ease-in-out infinite alternate; display: none; }
+  .teru-on .hanging-teru { display: block; }
+  @keyframes swing { from { transform: rotate(-10deg); } to { transform: rotate(10deg); } }
 
-  #board {
-    flex: 1; background: var(--pan); padding: 12px;
-    display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(3, 1fr); gap: 8px;
-    touch-action: none; min-height: 0; transition: filter 1s;
+  #beach {
+    flex: 1; position: relative; min-height: 0; touch-action: none; overflow: hidden;
+    background:
+      radial-gradient(circle, #d8c49a 1px, transparent 1.5px) 0 0 / 14px 14px,
+      radial-gradient(circle, #fff8 1px, transparent 1.5px) 7px 7px / 18px 18px,
+      var(--sand);
+    transition: filter 1s;
   }
-  .fx { position: absolute; inset: 56px 0 0; pointer-events: none; opacity: 0; transition: opacity 1s; }
+  #wet { position: absolute; inset: 0; background: var(--sand-wet); opacity: 0; transition: opacity .8s; pointer-events: none;
+    mask: radial-gradient(ellipse 120% 100% at 50% 0%, #000 55%, transparent 100%); -webkit-mask: radial-gradient(ellipse 120% 100% at 50% 0%, #000 55%, transparent 100%); }
+  #salts { position: absolute; inset: 0; }
+  .salt { position: absolute; width: 18%; max-width: 92px; aspect-ratio: 1; transform-origin: 50% 90%; transition: transform .5s linear; }
+  .salt .shio { width: 100%; height: 100%; pointer-events: none; animation: popin .4s cubic-bezier(.3,1.6,.5,1); }
+  .salt.ready .shio { animation: bob 1.6s ease-in-out infinite; filter: drop-shadow(0 0 5px #fff); }
+  .salt.ready .shio.damp { animation: none; filter: none; }
+  @keyframes popin { from { transform: scale(.3); } }
+  @keyframes bob { 50% { transform: translateY(-4px) scale(1.02, .98); } }
+  .shio svg { width: 100%; height: 100%; display: block; overflow: visible; }
+
+  .wetgauge { position: absolute; left: 10px; top: 8px; z-index: 120; background: #ffffffc0; border-radius: 999px; padding: 2px 8px; font-size: 11px; display: flex; align-items: center; gap: 5px; pointer-events: none; }
+  .wetgauge span { width: 44px; height: 5px; background: #0001; border-radius: 3px; overflow: hidden; }
+  .wetgauge i { display: block; height: 100%; background: var(--sea-deep); transition: width .5s; }
+
+  .splash-hint { position: absolute; left: 50%; top: 18%; transform: translateX(-50%); z-index: 130; background: #fff; border-radius: 999px; padding: 8px 16px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 12px #0002; white-space: nowrap; pointer-events: none; animation: hint 1.2s ease-in-out infinite; display: none; }
+  .splash-hint.show { display: block; }
+  @keyframes hint { 50% { transform: translate(-50%, -6px); } }
+
+  .wave-sheet { position: absolute; inset: 0; z-index: 140; pointer-events: none; background: linear-gradient(#7cc4e4ee, #7cc4e480 60%, #7cc4e400); animation: sheet .9s ease-out forwards; }
+  @keyframes sheet { from { transform: translateY(-100%); } 60% { opacity: 1; } to { transform: translateY(15%); opacity: 0; } }
+  .drop { position: absolute; z-index: 141; width: 10px; height: 10px; border-radius: 50% 50% 50% 0; background: #7cc4e4; pointer-events: none; animation: drop .8s ease-in forwards; }
+  @keyframes drop { from { transform: translateY(-40px) rotate(-45deg); opacity: 1; } to { transform: translateY(var(--dy)) rotate(-45deg) scale(.6); opacity: 0; } }
+
+  .fx { position: absolute; inset: 64px 0 0; pointer-events: none; opacity: 0; transition: opacity 1s; z-index: 125; }
   .w-rain .fx.rain { opacity: 1; }
   .fx.rain { background: repeating-linear-gradient(105deg, transparent 0 14px, #5a8fb055 14px 15px) 0 0 / 60px 60px; animation: rain .35s linear infinite; }
   @keyframes rain { to { background-position: -16px 60px; } }
   .w-wind .fx.wind { opacity: 1; }
-  .fx.wind { background: repeating-linear-gradient(0deg, transparent 0 46px, #ffffff99 46px 48px) 0 0 / 140px 100%; mask: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent) 0 0 / 140px 100%; -webkit-mask: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent) 0 0 / 140px 100%; animation: wind 1.2s linear infinite; }
+  .fx.wind { background: repeating-linear-gradient(0deg, transparent 0 46px, #ffffff99 46px 48px) 0 0 / 140px 100%; -webkit-mask: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent) 0 0 / 140px 100%; mask: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent) 0 0 / 140px 100%; animation: wind 1.2s linear infinite; }
   @keyframes wind { to { background-position: 140px 0; -webkit-mask-position: 140px 0; mask-position: 140px 0; } }
-  .w-rain #board, .w-rain .sea { filter: brightness(.82) saturate(.7); }
-  .w-cloud #board, .w-cloud .sea { filter: brightness(.93) saturate(.85); }
+  .w-rain #beach, .w-rain .sea { filter: brightness(.82) saturate(.7); }
+  .w-cloud #beach, .w-cloud .sea { filter: brightness(.93) saturate(.85); }
+  .teru-on .sea { filter: brightness(1.08) saturate(1.2); }
 
-  .cell {
-    background: var(--cell); border-radius: 12px; border: 2px solid var(--pan-line);
-    position: relative; display: flex; align-items: flex-end; justify-content: center;
-    min-height: 0; overflow: visible;
-  }
-  .cell.locked { background: #d8c9a6; border-style: dashed; opacity: .55; align-items: center; font-size: 18px; }
-  .cell .water { position: absolute; inset: 30% 10% 8%; border-radius: 50%; background: #a9d8ec55; }
-  .shio { width: 88%; max-width: 90px; aspect-ratio: 1; position: relative; transform-origin: 50% 90%; transition: transform .4s cubic-bezier(.3,1.6,.5,1); pointer-events: none; }
-  .shio svg { width: 100%; height: 100%; display: block; overflow: visible; }
-  .s0 { transform: scale(.35); }
-  .s1 { transform: scale(.65); }
-  .s2 { transform: scale(1); animation: bob 1.6s ease-in-out infinite; }
-  .s2.damp { animation: none; }
-  @keyframes bob { 50% { transform: translateY(-4px) scale(1.02, .98); } }
-  .cell.ready { box-shadow: inset 0 0 0 2px #fff, 0 0 10px #fff8; }
+  /* てるてる坊主ボタン */
+  .teru-btn { position: absolute; right: 10px; bottom: 24px; z-index: 135; width: 58px; height: 58px; border-radius: 50%; border: none; background: #fff; box-shadow: 0 4px 0 #0002; cursor: pointer; padding: 4px; display: none; }
+  .teru-btn.show { display: block; }
+  .teru-btn svg { width: 100%; height: 100%; }
+  .teru-btn:disabled { opacity: .55; }
+  .teru-btn .badge { position: absolute; right: -4px; top: -4px; background: var(--accent); color: #fff; font-size: 12px; font-weight: bold; border-radius: 999px; min-width: 20px; height: 20px; line-height: 20px; text-align: center; padding: 0 5px; }
+  .teru-btn .regen { position: absolute; left: 50%; bottom: -16px; transform: translateX(-50%); font-size: 9px; white-space: nowrap; background: #fffc; border-radius: 6px; padding: 0 4px; }
 
   .fly { position: fixed; pointer-events: none; z-index: 50; animation: fly .7s ease-in forwards; }
   @keyframes fly { to { transform: translateY(-120px) scale(.4) rotate(20deg); opacity: 0; } }
-  .plus { position: fixed; pointer-events: none; z-index: 51; font-weight: bold; color: var(--accent); font-size: 18px; text-shadow: 0 2px 0 #fff; animation: plus .9s ease-out forwards; white-space: nowrap; }
-  @keyframes plus { to { transform: translateY(-50px); opacity: 0; } }
+  .plus { position: fixed; pointer-events: none; z-index: 51; font-weight: bold; color: var(--accent); font-size: 18px; text-shadow: 0 2px 0 #fff, 0 0 4px #fff; animation: plus .9s ease-out forwards; white-space: nowrap; transform: translateX(-50%); }
+  .plus.combo { font-size: 22px; color: #e0a000; }
+  @keyframes plus { to { transform: translate(-50%, -50px); opacity: 0; } }
 
   /* まめ知識の吹き出し */
   .tip {
-    position: absolute; left: 16px; right: 16px; bottom: 72px; z-index: 60;
+    position: absolute; left: 16px; right: 16px; bottom: 70px; z-index: 160;
     background: #fff; border-radius: 16px; padding: 10px 12px; display: flex; gap: 10px; align-items: center;
     box-shadow: 0 6px 20px #0003; font-size: 13px; line-height: 1.6; cursor: pointer;
     transform: translateY(20px); opacity: 0; pointer-events: none; transition: .3s;
   }
   .tip.show { transform: none; opacity: 1; pointer-events: auto; }
-  .tip .shio { width: 52px; flex: none; }
+  .tip .shio { width: 48px; flex: none; }
   .tip small { display: block; color: var(--accent); font-weight: bold; font-size: 11px; }
 
   nav { display: flex; gap: 8px; }
   nav button, .btn {
     flex: 1; font: inherit; font-weight: bold; font-size: 14px; color: var(--ink);
-    background: var(--card); border: none; border-radius: 14px; padding: 12px 6px; cursor: pointer;
+    background: var(--card); border: none; border-radius: 14px; padding: 11px 6px; cursor: pointer;
     box-shadow: 0 4px 0 #0000001f; transition: transform .1s;
   }
   nav button:active, .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #0000001f; }
 
+  /* ストーリー */
+  #scene { position: fixed; inset: 0; z-index: 300; background: linear-gradient(#0000 30%, #0008); display: none; cursor: pointer; }
+  #scene.open { display: block; }
+  .scene-box { position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%); width: calc(100% - 32px); max-width: 488px; background: var(--card); border-radius: 20px; padding: 16px 16px 18px; border: 3px solid #fff; box-shadow: 0 8px 30px #0004; }
+  .scene-face { position: absolute; left: 14px; top: -64px; width: 80px; height: 80px; background: #fff; border-radius: 50%; padding: 6px; box-shadow: 0 4px 10px #0002; }
+  .scene-name { margin-left: 92px; font-weight: bold; color: var(--accent); font-size: 14px; min-height: 18px; }
+  .scene-text { margin-top: 8px; font-size: 16px; line-height: 1.75; min-height: 84px; white-space: pre-wrap; }
+  .scene-box.narr .scene-name { margin-left: 0; }
+  .scene-box.narr .scene-text { color: #6a5a48; }
+  .scene-next { position: absolute; right: 16px; bottom: 8px; font-size: 12px; opacity: .5; animation: hint 1s infinite; }
+
   /* モーダル */
-  .modal { position: fixed; inset: 0; background: #0006; display: none; align-items: center; justify-content: center; z-index: 100; padding: 16px; }
+  .modal { position: fixed; inset: 0; background: #0006; display: none; align-items: center; justify-content: center; z-index: 200; padding: 16px; }
   .modal.open { display: flex; }
   .panel { background: var(--card); border-radius: 20px; width: 100%; max-width: 480px; max-height: 88vh; overflow: auto; padding: 18px; position: relative; }
   .panel h2 { margin: 0 0 12px; font-size: 18px; }
@@ -127,7 +168,7 @@
   .dex { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 8px; }
   .dex .card { background: #fff; border-radius: 12px; padding: 6px; text-align: center; font-size: 11px; cursor: pointer; border: 2px solid transparent; }
   .dex .card.sel { border-color: var(--accent); }
-  .dex .card .shio { width: 64px; margin: 0 auto; }
+  .dex .card .shio { width: 64px; height: 64px; margin: 0 auto; }
   .dex .card.unknown .shio { filter: brightness(0); opacity: .18; }
   .stars { color: #f0b400; font-size: 10px; letter-spacing: -1px; }
   .detail { margin-top: 12px; background: #fff; border-radius: 12px; padding: 12px; font-size: 13px; line-height: 1.6; min-height: 60px; }
@@ -142,7 +183,7 @@
 
   .newcard { text-align: center; }
   .newcard .label { display: inline-block; background: var(--accent); color: #fff; border-radius: 999px; padding: 2px 12px; font-weight: bold; font-size: 13px; }
-  .newcard .shio { width: 140px; margin: 10px auto; }
+  .newcard .shio { width: 140px; height: 140px; margin: 10px auto; }
   .newcard h3 { margin: 4px 0; font-size: 22px; }
   .newcard p { font-size: 14px; line-height: 1.6; }
 
@@ -166,22 +207,35 @@
     <div class="sp"><b id="sp">0</b> SP</div>
   </header>
 
+  <div class="goal">
+    <div class="goal-ch" id="goalCh"></div>
+    <div class="goal-body"><span id="goalText"></span><span id="goalNum"></span></div>
+    <div class="gbar"><i id="goalFill"></i></div>
+  </div>
+
   <div class="meter">
-    <div class="meter-top"><span>🏠 わが家の塩の自給率</span><span><b id="rate">0</b>%</span></div>
+    <div class="meter-top"><span>🏠 わが家の塩の自給率 <small style="opacity:.6">｜日本は約10%</small></span><span><b id="rate">0</b>%</span></div>
     <div class="bar"><div class="fill" id="rateFill"></div><div class="jp"></div></div>
     <div class="meter-legend">
       <span>ストック <b id="stock">0</b>g</span>
-      <span><i style="background:var(--self)"></i>手づくり</span>
-      <span><i style="background:var(--import)"></i>輸入塩</span>
+      <span><span><i style="background:var(--self)"></i>手づくり</span>　<span><i style="background:var(--import)"></i>輸入塩</span></span>
     </div>
   </div>
 
   <div id="stage">
-    <div class="sea">
-      <div class="weather"><span id="wNow">☀️ はれ</span><span class="timer"><i id="wTimer"></i></span><span class="next" id="wNext"></span></div>
+    <div class="sea" id="sea">
+      <div class="weather"><span id="wNow">☀️ はれ</span><span class="timer" id="wTimerBox"><i id="wTimer"></i></span><span class="next" id="wNext"></span></div>
       <div class="sky-icon" id="sky">☀️</div>
+      <div class="hanging-teru" id="hangingTeru"></div>
+      <div class="sea-label">🌊 タップで海水をまく</div>
     </div>
-    <div id="board"></div>
+    <div id="beach">
+      <div id="wet"></div>
+      <div id="salts"></div>
+      <div class="wetgauge">💧<span><i id="wetFill"></i></span></div>
+      <div class="splash-hint" id="splashHint">⬆️ 海をタップして海水をまこう</div>
+      <button class="teru-btn" id="teruBtn"><span id="teruIcon"></span><span class="badge" id="teruCount">0</span><span class="regen" id="teruRegen"></span></button>
+    </div>
     <div class="fx rain"></div>
     <div class="fx wind"></div>
   </div>
@@ -193,6 +247,15 @@
   </nav>
 
   <div class="tip" id="tip"></div>
+</div>
+
+<div id="scene">
+  <div class="scene-box" id="sceneBox">
+    <div class="scene-face" id="sceneFace"></div>
+    <div class="scene-name" id="sceneName"></div>
+    <div class="scene-text" id="sceneText"></div>
+    <div class="scene-next">▼ タップ</div>
+  </div>
 </div>
 
 <div class="modal" id="dexModal"><div class="panel">
@@ -242,7 +305,7 @@ const TYPES = [
     desc: '見た目はこわいけど、ゆで卵にかけると優しい味。',
     mame: 'ハワイの黒い塩は、塩に炭をまぜて黒くしているんだって。' },
   { id: 'jii', name: 'しおじいさん', w: 1.5, sp: 30, g: 20, rank: 4, colors: ['#f6f3ec', '#e4ddcf', '#cfc5b2'], face: 'old',
-    desc: '塩田に何十年もいる長老。「わしの若いころは、海辺は塩田だらけじゃった」',
+    desc: 'この浜に何十年もいる塩の精。「わしの若いころは、海辺は塩田だらけじゃった」',
     mame: '昔の日本の海辺にはたくさんの塩田があったけど、1970年代はじめにほとんどが姿を消したんだ。' },
   { id: 'sato', name: 'さとう', w: 2, sp: 0, g: 0, rank: 3, colors: ['#ffffff', '#f2f0ff', '#dcdaf0'], face: 'sweat',
     desc: 'なぜか紛れこんでいた砂糖。本人は塩のつもり。ポイントにならない。',
@@ -257,12 +320,12 @@ const TYPES = [
 const TYPE = Object.fromEntries(TYPES.map(t => [t.id, t]));
 
 // ---------- 天気 ----------
-// grow: 成長の速さ, damp: しけやすさ
+// grow: 塩が育つ速さ, damp: しけやすさ, evap: 砂浜の海水が乾く速さ (1秒あたり)
 const WEATHERS = {
-  sun:   { icon: '☀️', name: 'はれ',     grow: 1,   damp: 1 },
-  wind:  { icon: '🌬️', name: 'はれ・風', grow: 1.5, damp: 0.6 },
-  cloud: { icon: '☁️', name: 'くもり',   grow: 0.4, damp: 1.5 },
-  rain:  { icon: '🌧️', name: 'あめ',     grow: 0,   damp: 3 },
+  sun:   { icon: '☀️', name: 'はれ',     grow: 1,   damp: 1,   evap: 0.008 },
+  wind:  { icon: '🌬️', name: 'はれ・風', grow: 1.5, damp: 0.6, evap: 0.014 },
+  cloud: { icon: '☁️', name: 'くもり',   grow: 0.4, damp: 1.5, evap: 0.004 },
+  rain:  { icon: '🌧️', name: 'あめ',     grow: 0,   damp: 3,   evap: 0 },
 };
 const W_PERIOD = 40_000;
 function weatherAt(t) {
@@ -274,10 +337,16 @@ function weatherAt(t) {
 
 const GROW = 40_000;          // 晴れの日に育ちきるまで (ms)
 const DAMP_AFTER = 150_000;   // 育ってから湿気るまで (ms)
+const WET_PER_SALT = 0.1;     // 塩の粒が1つ生まれるのに使う海水
 const USE_PER_SEC = 1;        // 家族が1秒に使う塩 (g)
 const RATE_TAU = 120_000;     // 自給率がなじむ速さ (ms)
 const MAX_OFFLINE = 3 * 3600_000;
-const MAX_SLOTS = 15;
+const SPOTS = 15;             // 砂浜で塩が生える場所の数
+
+const TERU_TIME = 60_000;     // てるてる坊主の効き目
+const TERU_BOOST = 2.5;       // てるてる晴れの加速
+const TERU_REGEN = 10 * 60_000;
+const TERU_MAX = 3;
 
 // ---------- しおや ----------
 const UPGRADES = [
@@ -285,8 +354,8 @@ const UPGRADES = [
     desc: '竹の枝に海水をしたたらせて、風で水を飛ばす昔の装置。風の日にぐんぐん育つ。' },
   { id: 'house', name: '🏠 結晶ハウス', max: 3, cost: lv => 120 * 3 ** lv,
     desc: '雨をよけて天日干しできるハウス。雨の日も少し育ち、しけにくくなる。' },
-  { id: 'field', name: '🧱 塩田をひろげる', max: 9, cost: lv => Math.round(40 * (lv + 1) ** 1.6),
-    desc: '塩が育つ場所が1マス増える。' },
+  { id: 'field', name: '🏖 浜をひろげる', max: 9, cost: lv => Math.round(40 * (lv + 1) ** 1.6),
+    desc: '一度に育てられる塩が1つ増える。' },
   { id: 'rare', name: '🌊 きれいな海', max: 5, cost: lv => 80 * 2 ** lv,
     desc: '海がきれいだと、めずらしい塩が育ちやすくなる。' },
 ];
@@ -300,35 +369,116 @@ const dampRate = w => w === 'rain' ? 3 - 0.8 * state.up.house : WEATHERS[w].damp
 
 // ---------- まめ知識（できごとで出てくる） ----------
 const TIPS = {
-  first:   '海水を太陽にあてると、水だけが蒸発して塩が残る。これが「天日塩（てんぴえん）」。燃料も電気もいらない塩づくりなんだ。',
   rain:    '雨だと塩が育たない…。日本は雨が多く湿気も高いから、太陽だけで塩をつくるのが難しい国なんだ。',
   wind:    '風がふくと水がどんどん蒸発する！ 太陽と風、自然の力だけでできる天日塩は、地球にやさしい塩なんだ。',
   damp:    '塩がしけちゃった。梅雨や夏の湿気は、日本の塩づくりの大敵なんだ。',
-  over10:  '自給率10%をこえた！ じつは日本の塩の自給率は約10%。使う塩の約9割は外国から来ているよ。',
-  half:    '自給率50%！ 足りない分は輸入塩でおぎなっているよ。日本に来る輸入塩の多くは、メキシコやオーストラリアの天日塩なんだ。',
-  full:    'わが家の塩は自給率100%！',
+  dry:     '砂浜がかわいた！ 海水の水分が蒸発して、塩だけが残ったんだ。',
   low:     '自給率が下がってきた…。塩づくりを休むと、そのぶん輸入塩にたよることになるんだ。',
   house:   '日本でも、ハウスで雨をよけながら天日塩をつくっている人たちがいるよ。',
   shijoka: '枝条架は、昔の日本の塩田で使われていた道具。風の力で海水を濃くするんだ。',
 };
 
+// ---------- ストーリー ----------
+const BAA_SVG = `<svg viewBox="0 0 100 100"><circle cx="50" cy="20" r="12" fill="#d4d4d4" stroke="#5a4a3a" stroke-width="2"/><circle cx="50" cy="56" r="32" fill="#ffe2c8" stroke="#5a4a3a" stroke-width="2"/><path d="M18 54 Q18 24 50 24 Q82 24 82 54 Q72 38 50 38 Q28 38 18 54Z" fill="#d4d4d4" stroke="#5a4a3a" stroke-width="2"/><circle cx="38" cy="58" r="7" fill="#fff8" stroke="#5a4a3a" stroke-width="2"/><circle cx="62" cy="58" r="7" fill="#fff8" stroke="#5a4a3a" stroke-width="2"/><path d="M45 58 h10" stroke="#5a4a3a" stroke-width="2"/><path d="M35 59 q3 -3 6 0 M59 59 q3 -3 6 0" stroke="#5a4a3a" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M42 72 q8 6 16 0" stroke="#5a4a3a" stroke-width="2.2" fill="none" stroke-linecap="round"/><ellipse cx="27" cy="70" rx="5" ry="3" fill="#ff8a9a" opacity=".5"/><ellipse cx="73" cy="70" rx="5" ry="3" fill="#ff8a9a" opacity=".5"/></svg>`;
+const SPEAKERS = {
+  jii: { name: 'しおじいさん', face: () => shioSVG('jii') },
+  baa: { name: 'おばあちゃん', face: () => BAA_SVG },
+};
+const pct = () => Math.round(state.rate * 100);
+
+const CHAPTERS = [
+  { title: '第1話　浜の塩の精', goal: '海水をまいて、塩を3つ収穫しよう', prog: () => [state.harvested, 3], reward: { sp: 10 },
+    intro: [
+      ['na', '夏休み。きみは、海辺の町に住むおばあちゃんの家にやってきた。'],
+      ['na', '家の裏の砂浜を歩いていると…\n白くて四角いなにかが、ちょこんと座っている。'],
+      ['jii', 'おや、人間の子どもとは めずらしい。\nわしは この浜に住む塩の精、しおじいさんじゃ。'],
+      ['jii', '昔はこの浜も、塩づくりで にぎわっておったんじゃがのう…。'],
+      ['jii', 'どうじゃ、塩づくりを手伝ってくれんか？\nまずは 上の海をタップして、砂浜に海水をまいてみるんじゃ！'],
+      ['jii', 'お日さまが海水を乾かすと、塩の粒が生まれて、だんだん大きくなる。\n育ったら、タップかなぞって収穫じゃ！'],
+    ] },
+  { title: '第2話　塩自給生活のはじまり', goal: 'わが家の自給率を10%にしよう', prog: () => [pct(), 10], unit: '%', reward: { sp: 30 },
+    intro: [
+      ['jii', 'うまいもんじゃ！\n塩はな、海水の水が お日さまと風で蒸発して、残ったものなんじゃ。'],
+      ['jii', '砂浜に海水をまいて乾かすやり方は「揚げ浜式」というてな。\n能登などで今も続いておる、古い塩づくりじゃ。'],
+      ['baa', 'あら、塩をつくってるの？\nじゃあ、うちで使う塩をお願いしようかしら。'],
+      ['baa', '足りないぶんは、お店で買ってくるからね。'],
+      ['jii', 'ほほう、家の塩を手づくりでまかなう…\n「塩自給生活」のはじまりじゃな！'],
+      ['jii', '上のメーターが「わが家の自給率」じゃ。\n収穫した塩を家で使うほど、ふえていくぞい。'],
+    ] },
+  { title: '第3話　雨の国の塩づくり', goal: 'てるてる坊主を使ってみよう', prog: () => [state.flags.teru ? 1 : 0, 1], reward: { sp: 20, teru: 1 },
+    gift: { teru: 2 },
+    intro: [
+      ['jii', '10%か。じつはな、日本の塩の自給率も 約10%しかないんじゃ。'],
+      ['na', 'え、じゃあ残りの90%は…？'],
+      ['jii', '外国から船で運ばれてくるんじゃよ。\nメキシコやオーストラリアの、広い広い天日塩田からな。'],
+      ['jii', '日本は雨が多くて、湿気も多い。\nお日さまだけで塩をつくるには、ちと むずかしい国なんじゃ。'],
+      ['jii', 'そこで、これじゃ！'],
+      ['na', '☁️ てるてる坊主を 2つ もらった！'],
+      ['jii', 'てるてる坊主をつるすと、しばらく晴れて、塩がぐんぐん育つぞい。\n右下のボタンで使えるんじゃ。'],
+      ['jii', '使っても、時間がたつと また作れるからの。'],
+    ] },
+  { title: '第4話　風の力', goal: '「しおや」で枝条架をつくろう', prog: () => [state.up.shijoka, 1], reward: { sp: 40 },
+    intro: [
+      ['jii', '晴れると気持ちがいいのう！'],
+      ['jii', 'お日さまと風だけでつくる塩は、燃料も電気もいらん。\n地球にやさしい塩なんじゃ。'],
+      ['jii', '次は 風の力も借りてみよう。\n「しおや」で、昔の道具「枝条架（しじょうか）」をつくるんじゃ。'],
+    ] },
+  { title: '第5話　半分じまん', goal: 'わが家の自給率を50%にしよう', prog: () => [pct(), 50], unit: '%', reward: { sp: 60, teru: 2 },
+    intro: [
+      ['jii', '風がふくと、水がどんどん飛んでいくじゃろう。昔の人の知恵じゃ。'],
+      ['baa', '最近、お店で塩を買うことが へってきたわ。'],
+      ['jii', 'もうひといきじゃ。わが家の自給率 50%をめざそう！'],
+    ] },
+  { title: '第6話　浜のなかまたち', goal: '図鑑に6種類の塩をのせよう', prog: () => [Object.keys(state.dex).length, 6], reward: { sp: 80 },
+    intro: [
+      ['baa', 'うちの塩の半分は、この浜の塩なのよ。\nご近所さんに じまんしちゃった。'],
+      ['jii', 'この浜には、いろんな塩が生まれる。\nめずらしい塩を見つけたら、図鑑にのせるんじゃぞ。'],
+    ] },
+  { title: '第7話　雨にもまけず', goal: '「しおや」で結晶ハウスをつくろう', prog: () => [state.up.house, 1], reward: { teru: 2 },
+    intro: [
+      ['jii', 'ところで、雨の日はどうしたもんかのう。'],
+      ['jii', '日本には、雨をよける「結晶ハウス」で、\n雨の日も天日干しをしておる人たちがいるんじゃ。'],
+      ['jii', 'わしらも つくってみよう！'],
+    ] },
+  { title: '第8話　塩自給生活', goal: 'わが家の自給率を100%にしよう', prog: () => [pct(), 100], unit: '%', reward: { sp: 200 },
+    intro: [
+      ['jii', 'これで雨にも まけんぞ！'],
+      ['jii', 'いよいよじゃ。わが家の塩を、ぜんぶ この浜の塩にするんじゃ！'],
+    ] },
+  { title: '最終話　浜から、日本へ', goal: '図鑑をコンプリートしよう', prog: () => [Object.keys(state.dex).length, TYPES.length], reward: { sp: 500, teru: 3 },
+    after: () => openModal('jpModal'),
+    intro: [
+      ['baa', 'すごいわね！\nうちの塩は、ぜーんぶ この浜の塩よ！'],
+      ['jii', 'ようやった。じゃがな…\n日本で使う塩のほとんどは、工場で使う塩なんじゃ。'],
+      ['jii', 'ガラスや紙、水道の消毒…\nみんなの暮らしは、たくさんの塩に支えられておる。'],
+      ['jii', 'この浜から、町へ、日本へ。\n太陽と風でつくる塩の輪を、広げていこうじゃないか。'],
+      ['na', '日本の塩のいまを見てみよう。'],
+    ] },
+  { title: '第1部 クリア！', goal: 'つづきは近日公開…！', prog: null,
+    intro: [
+      ['jii', '図鑑がいっぱいじゃ！ きみは立派な塩づくり名人じゃ。'],
+      ['jii', 'また いつでも浜においで。\nわしは ここで待っておるからの。'],
+      ['na', '— 第1部 おしまい —'],
+    ] },
+];
+
 // ---------- 状態 ----------
-const KEY = 'shio-jikyu-v1';
+const KEY = 'shio-jikyu-v2';
 function freshState() {
-  const now = Date.now();
   return {
-    sp: 0, stock: 0, rate: 0, dex: {}, tips: {},
+    sp: 0, stock: 0, rate: 0, dex: {}, tips: {}, flags: {},
     up: { shijoka: 0, house: 0, field: 0, rare: 0 },
-    lastTick: now,
-    slots: Array.from({ length: MAX_SLOTS }, (_, i) => ({ type: null, prog: 0, ready: 0, wait: 800 + i * 400 })),
+    lastTick: Date.now(),
+    wet: 0, spawnWait: 600, salts: [], nextId: 1, harvested: 0,
+    teru: { count: 0, until: 0, regenAt: 0 },
+    chapter: 0, sceneSeen: -1,
   };
 }
 let state;
 try { state = JSON.parse(localStorage.getItem(KEY)) || freshState(); } catch { state = freshState(); }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} }
 
-const unlocked = () => 6 + state.up.field;
-const spawnDelay = () => 3000 + Math.random() * 7000;
+const capacity = () => 6 + state.up.field;
 
 function pickType() {
   const boost = 1 + 0.5 * state.up.rare;
@@ -338,30 +488,51 @@ function pickType() {
   return 'futsu';
 }
 
-const stageOf = s => s.prog >= GROW ? 2 : s.prog >= GROW / 2 ? 1 : 0;
-const isDamp = s => s.prog >= GROW && s.ready >= DAMP_AFTER;
+function spawnSalt() {
+  const used = new Set(state.salts.map(s => s.spot));
+  const free = [...Array(SPOTS).keys()].filter(i => !used.has(i));
+  if (!free.length) return;
+  const spot = free[Math.floor(Math.random() * free.length)];
+  const j = () => (Math.random() - .5) * 8;
+  state.salts.push({
+    id: state.nextId++, spot, type: pickType(), prog: 0, ready: 0,
+    x: 12 + (spot % 5) * 19 + j(), y: 36 + Math.floor(spot / 5) * 26 + j(),
+  });
+}
 
-// 時間を進める（留守のあいだの分も、天気ごとに区切って計算）
+const stageOf = s => s.prog >= GROW ? 2 : s.prog >= GROW * 0.45 ? 1 : 0;
+const isDamp = s => s.prog >= GROW && s.ready >= DAMP_AFTER;
+const scaleOf = s => 0.16 + 0.84 * Math.pow(s.prog / GROW, 0.8);
+const teruActive = now => now < state.teru.until;
+const weatherNow = now => teruActive(now) ? 'sun' : weatherAt(now);
+
+// 時間を進める（留守のあいだの分も、天気・てるてる坊主ごとに区切って計算）
 function advance(to) {
   let t = Math.max(state.lastTick, to - MAX_OFFLINE);
   while (t < to) {
-    const end = Math.min((Math.floor(t / W_PERIOD) + 1) * W_PERIOD, to);
-    step(weatherAt(t), end - t);
+    let end = Math.min((Math.floor(t / W_PERIOD) + 1) * W_PERIOD, to);
+    const teru = teruActive(t);
+    if (teru) end = Math.min(end, state.teru.until);
+    step(teru ? 'sun' : weatherAt(t), end - t, teru ? TERU_BOOST : 1);
     t = end;
   }
   state.lastTick = to;
 }
-function step(w, dt) {
-  state.slots.forEach((s, i) => {
-    if (i >= unlocked()) return;
-    if (!s.type) {
-      if ((s.wait -= dt) <= 0) { s.type = pickType(); s.prog = 0; s.ready = 0; }
-    } else if (s.prog < GROW) {
-      s.prog = Math.min(GROW, s.prog + dt * growRate(w));
-    } else {
-      s.ready += dt * dampRate(w);
+function step(w, dt, boost) {
+  // 砂浜の海水から、塩の粒が生まれる
+  if (state.wet > 0 && state.salts.length < capacity()) {
+    state.spawnWait -= dt * boost;
+    while (state.spawnWait <= 0 && state.wet > 0 && state.salts.length < capacity()) {
+      spawnSalt();
+      state.wet = Math.max(0, state.wet - WET_PER_SALT);
+      state.spawnWait += 1200 + Math.random() * 2500;
     }
-  });
+  }
+  state.wet = Math.max(0, state.wet - dt / 1000 * WEATHERS[w].evap * boost);
+  for (const s of state.salts) {
+    if (s.prog < GROW) s.prog = Math.min(GROW, s.prog + dt * growRate(w) * boost);
+    else s.ready += dt * dampRate(w);
+  }
   // 家族が塩を使う。手づくりのストックがなければ輸入塩を使う
   const need = USE_PER_SEC * dt / 1000;
   const own = Math.min(state.stock, need);
@@ -369,19 +540,19 @@ function step(w, dt) {
   state.rate += (own / need - state.rate) * (1 - Math.exp(-dt / RATE_TAU));
 }
 
-// ---------- 塩のキャラ (等角の立方体 + 顔) ----------
+// ---------- 絵 ----------
 function shioSVG(id, stage = 2, damp = false) {
   const t = TYPE[damp ? 'damp' : id];
   const [top, left, right] = t.colors;
   const line = '#5a4a3a';
   let deco = '', face = '';
 
-  if (t.grains) {
+  if (t.grains && stage > 0) {
     const g = typeof t.grains === 'string' ? t.grains : '#c8bca0';
     deco += [[30, 30], [60, 22], [70, 36], [22, 60], [78, 62], [40, 82]]
       .map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.4" fill="${g}"/>`).join('');
   }
-  if (t.snow) deco += `<circle cx="50" cy="12" r="5" fill="#fff"/><circle cx="40" cy="15" r="4" fill="#fff"/><circle cx="60" cy="15" r="4" fill="#fff"/>`;
+  if (t.snow && stage > 0) deco += `<circle cx="50" cy="12" r="5" fill="#fff"/><circle cx="40" cy="15" r="4" fill="#fff"/><circle cx="60" cy="15" r="4" fill="#fff"/>`;
   if (t.shine) deco += ['M8 18 l3 -8 l3 8 l8 3 l-8 3 l-3 8 l-3 -8 l-8 -3z', 'M86 6 l2 -5 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2z', 'M90 80 l2 -5 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2z']
     .map(d => `<path d="${d}" fill="#ffd400"/>`).join('');
 
@@ -389,7 +560,7 @@ function shioSVG(id, stage = 2, damp = false) {
   const eyes = `<circle cx="38" cy="64" r="3.6" fill="${line}"/><circle cx="62" cy="64" r="3.6" fill="${line}"/><circle cx="39.2" cy="62.8" r="1.2" fill="#fff"/><circle cx="63.2" cy="62.8" r="1.2" fill="#fff"/>`;
   const mouth = `<path d="M46 71 q4 4 8 0" stroke="${line}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`;
 
-  if (stage === 0) face = '';
+  if (stage === 0) face = `<path d="M50 30 l2 -6 l2 6 l6 2 l-6 2 l-2 6 l-2 -6 l-6 -2z" fill="#fff"/>`;
   else if (stage === 1) face = `<path d="M33 64 q5 4 10 0 M57 64 q5 4 10 0" stroke="${line}" stroke-width="2.2" fill="none" stroke-linecap="round"/>${blush}`;
   else switch (damp ? 'droopy' : t.face) {
     case 'happy': face = `<path d="M33 66 l5 -5 l5 5 M57 66 l5 -5 l5 5" stroke="${line}" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M44 70 q6 8 12 0z" fill="${line}"/>${blush}`; break;
@@ -400,75 +571,212 @@ function shioSVG(id, stage = 2, damp = false) {
     default: face = eyes + mouth + blush;
   }
 
+  // 粒のうちは色を白く寄せて、ただの結晶っぽく
+  const c = stage === 0 ? ['#ffffff', '#f3f6f8', '#e2e8ee'] : [top, left, right];
   return `<svg viewBox="0 0 100 100"><ellipse cx="50" cy="95" rx="30" ry="4" fill="#00000018"/>
-    <polygon points="50,10 88,30 50,52 12,30" fill="${top}" stroke="${line}" stroke-width="2" stroke-linejoin="round"/>
-    <polygon points="12,30 50,52 50,92 12,72" fill="${left}" stroke="${line}" stroke-width="2" stroke-linejoin="round"/>
-    <polygon points="88,30 88,72 50,92 50,52" fill="${right}" stroke="${line}" stroke-width="2" stroke-linejoin="round"/>
+    <polygon points="50,10 88,30 50,52 12,30" fill="${c[0]}" stroke="${line}" stroke-width="2" stroke-linejoin="round"/>
+    <polygon points="12,30 50,52 50,92 12,72" fill="${c[1]}" stroke="${line}" stroke-width="2" stroke-linejoin="round"/>
+    <polygon points="88,30 88,72 50,92 50,52" fill="${c[2]}" stroke="${line}" stroke-width="2" stroke-linejoin="round"/>
     <path d="M20 31 L50 17" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".8"/>
     ${deco}${face}</svg>`;
 }
 
-// ---------- 盤面 ----------
-const $ = id => document.getElementById(id);
-const board = $('board');
-const cells = Array.from({ length: MAX_SLOTS }, (_, i) => {
-  const el = document.createElement('div');
-  el.className = 'cell'; el.dataset.i = i; el._key = '';
-  board.appendChild(el);
-  return el;
-});
+const TERU_SVG = `<svg viewBox="0 0 60 80"><line x1="30" y1="0" x2="30" y2="14" stroke="#888" stroke-width="2"/><path d="M17 34 Q12 60 8 70 Q30 76 52 70 Q48 60 43 34 Z" fill="#fff" stroke="#5a4a3a" stroke-width="2" stroke-linejoin="round"/><circle cx="30" cy="27" r="13" fill="#fff" stroke="#5a4a3a" stroke-width="2"/><path d="M19 37 Q30 42 41 37" stroke="#e8735a" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="25" cy="26" r="1.8" fill="#5a4a3a"/><circle cx="35" cy="26" r="1.8" fill="#5a4a3a"/><path d="M26 31 q4 3 8 0" stroke="#5a4a3a" stroke-width="1.8" fill="none" stroke-linecap="round"/><ellipse cx="21" cy="30" rx="3" ry="1.8" fill="#ff8a9a" opacity=".5"/><ellipse cx="39" cy="30" rx="3" ry="1.8" fill="#ff8a9a" opacity=".5"/></svg>`;
+$('teruIcon').innerHTML = TERU_SVG;
+$('hangingTeru').innerHTML = TERU_SVG;
+function $(id) { return document.getElementById(id); }
 
-let lastWeather = null;
+// ---------- 描画 ----------
+const saltEls = new Map();
+function renderSalts() {
+  const alive = new Set();
+  for (const s of state.salts) {
+    alive.add(s.id);
+    let el = saltEls.get(s.id);
+    if (!el) {
+      el = document.createElement('div');
+      el.className = 'salt'; el.dataset.id = s.id; el._key = '';
+      Object.assign(el.style, { left: s.x + '%', top: s.y + '%', zIndex: Math.round(s.y) });
+      $('salts').appendChild(el);
+      saltEls.set(s.id, el);
+    }
+    const st = stageOf(s), damp = isDamp(s), key = `${st}-${damp}`;
+    if (el._key !== key) {
+      el._key = key;
+      el.classList.toggle('ready', st === 2);
+      el.innerHTML = `<div class="shio${damp ? ' damp' : ''}">${shioSVG(s.type, st, damp)}</div>`;
+      if (damp) showTip('damp');
+    }
+    el.style.transform = `translate(-50%, -90%) scale(${scaleOf(s).toFixed(3)})`;
+  }
+  for (const [id, el] of saltEls) if (!alive.has(id)) { el.remove(); saltEls.delete(id); }
+}
+
+let lastWeather = null, wasWet = false;
 function tick() {
   const now = Date.now();
   advance(now);
+  regenTeru(now);
 
   // 天気
-  const w = weatherAt(now), next = weatherAt(now + W_PERIOD);
-  if (w !== lastWeather) {
-    lastWeather = w;
-    $('app').className = `w-${w}`;
-    $('wNow').textContent = `${WEATHERS[w].icon} ${WEATHERS[w].name}`;
+  const teru = teruActive(now), w = weatherNow(now);
+  const wKey = teru ? 'teru' : w;
+  if (wKey !== lastWeather) {
+    lastWeather = wKey;
+    $('app').className = `w-${w}${teru ? ' teru-on' : ''}`;
     $('sky').textContent = WEATHERS[w].icon;
-    $('wNext').textContent = `つぎ ${WEATHERS[next].icon}`;
-    if (w === 'rain') showTip('rain');
-    if (w === 'wind') showTip('wind');
+    if (!teru && w === 'rain') showTip('rain');
+    if (!teru && w === 'wind') showTip('wind');
   }
-  $('wTimer').style.width = `${100 - (now % W_PERIOD) / W_PERIOD * 100}%`;
+  if (teru) {
+    $('wNow').textContent = `☀️ てるてる晴れ ${Math.ceil((state.teru.until - now) / 1000)}秒`;
+    $('wTimerBox').style.display = 'none'; $('wNext').textContent = '';
+  } else {
+    $('wNow').textContent = `${WEATHERS[w].icon} ${WEATHERS[w].name}`;
+    $('wTimerBox').style.display = '';
+    $('wTimer').style.width = `${100 - (now % W_PERIOD) / W_PERIOD * 100}%`;
+    $('wNext').textContent = `つぎ ${WEATHERS[weatherAt(now + W_PERIOD)].icon}`;
+  }
 
-  // 盤面
-  state.slots.forEach((s, i) => {
-    const el = cells[i];
-    if (i >= unlocked()) {
-      if (el._key !== 'L') { el._key = 'L'; el.className = 'cell locked'; el.innerHTML = '🔒'; }
-      return;
-    }
-    if (!s.type) {
-      if (el._key !== 'E') { el._key = 'E'; el.className = 'cell'; el.innerHTML = '<div class="water"></div>'; }
-      return;
-    }
-    const st = stageOf(s), damp = isDamp(s);
-    const key = `${s.type}-${st}-${damp}`;
-    if (el._key !== key) {
-      el._key = key;
-      el.className = 'cell' + (st === 2 ? ' ready' : '');
-      el.innerHTML = `<div class="water"></div><div class="shio s${st}${damp ? ' damp' : ''}">${shioSVG(s.type, st, damp)}</div>`;
-      if (damp) showTip('damp');
-    }
-  });
+  // 砂浜
+  $('wet').style.opacity = (state.wet * 0.65).toFixed(2);
+  $('wetFill').style.width = state.wet * 100 + '%';
+  if (state.wet > 0.05) wasWet = true;
+  else if (wasWet && state.salts.length) { wasWet = false; showTip('dry'); }
+  $('splashHint').classList.toggle('show', state.wet < 0.05 && state.salts.length < capacity() && !scene);
+  renderSalts();
 
-  renderHud();
-  checkRateTips();
+  renderHud(now);
+  if (state.tips.half && state.rate < 0.3) showTip('low');
+  if (state.rate >= 0.5) state.tips.half = true;
+  checkChapter();
   save();
 }
 
-function checkRateTips() {
-  const r = state.rate;
-  if (r >= 0.1) showTip('over10');
-  if (r >= 0.5) showTip('half');
-  if (r >= 0.995 && !state.tips.full) { state.tips.full = true; setTimeout(() => openModal('jpModal'), 600); }
-  if (state.tips.half && r < 0.3) showTip('low');
+// ---------- 海水をまく ----------
+function splash() {
+  if (scene) return;
+  if (state.wet > 0.9) { floatText(innerWidth / 2, $('beach').getBoundingClientRect().top + 60, 'もう びしょびしょ！'); return; }
+  state.wet = 1;
+  if (state.spawnWait > 800) state.spawnWait = 400;
+  const beach = $('beach');
+  const sheet = document.createElement('div');
+  sheet.className = 'wave-sheet';
+  beach.appendChild(sheet);
+  setTimeout(() => sheet.remove(), 900);
+  const h = beach.clientHeight;
+  for (let i = 0; i < 18; i++) {
+    const d = document.createElement('div');
+    d.className = 'drop';
+    d.style.left = Math.random() * 100 + '%';
+    d.style.top = '0';
+    d.style.setProperty('--dy', (0.2 + Math.random() * 0.75) * h + 'px');
+    d.style.animationDelay = Math.random() * 0.25 + 's';
+    beach.appendChild(d);
+    setTimeout(() => d.remove(), 1100);
+  }
+  sound(300, 120, 0.35, 'triangle');
+  tick();
 }
+$('sea').addEventListener('pointerdown', splash);
+
+// ---------- てるてる坊主 ----------
+function regenTeru(now) {
+  const t = state.teru;
+  if (state.chapter < 2 || t.count >= TERU_MAX) { t.regenAt = 0; return; }
+  if (!t.regenAt) t.regenAt = now + TERU_REGEN;
+  while (now >= t.regenAt && t.count < TERU_MAX) { t.count++; t.regenAt += TERU_REGEN; }
+  if (t.count >= TERU_MAX) t.regenAt = 0;
+}
+$('teruBtn').addEventListener('pointerdown', e => {
+  e.stopPropagation();
+  const t = state.teru, now = Date.now();
+  if (t.count <= 0) { floatText(e.clientX, e.clientY - 30, 'てるてる坊主がない…'); return; }
+  t.count--;
+  t.until = Math.max(now, t.until) + TERU_TIME;
+  state.flags.teru = true;
+  floatText(e.clientX, e.clientY - 40, 'あーした天気になーれ！', true);
+  sound(660, 990, 0.3);
+  lastWeather = null;
+  tick();
+});
+
+// ---------- 収穫 ----------
+let audio;
+function sound(f1 = 520, f2 = 1100, dur = 0.15, type = 'sine') {
+  try {
+    audio ||= new (window.AudioContext || window.webkitAudioContext)();
+    const o = audio.createOscillator(), g = audio.createGain(), t = audio.currentTime;
+    o.type = type;
+    o.frequency.setValueAtTime(f1, t);
+    o.frequency.exponentialRampToValueAtTime(f2, t + dur * 0.5);
+    g.gain.setValueAtTime(0.15, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    o.connect(g).connect(audio.destination);
+    o.start(t); o.stop(t + dur + 0.01);
+  } catch {}
+}
+function floatText(x, y, text, combo = false) {
+  const el = document.createElement('div');
+  el.className = 'plus' + (combo ? ' combo' : '');
+  el.textContent = text;
+  Object.assign(el.style, { left: x + 'px', top: y + 'px' });
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 900);
+}
+
+const newQueue = [];
+let combo = 0, lastHit = null;
+function harvest(sid) {
+  const idx = state.salts.findIndex(s => s.id === sid);
+  if (idx < 0 || scene) return;
+  const s = state.salts[idx];
+  if (stageOf(s) < 2) return;
+  const id = isDamp(s) ? 'damp' : s.type, t = TYPE[id];
+  const el = saltEls.get(sid), r = el.getBoundingClientRect();
+
+  const fly = el.querySelector('.shio').cloneNode(true);
+  Object.assign(fly.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' });
+  fly.className = 'shio fly';
+  document.body.appendChild(fly);
+  setTimeout(() => fly.remove(), 700);
+  floatText(r.left + r.width / 2, r.top, t.g ? `+${t.g}g` : 'あまい…');
+
+  combo++;
+  lastHit = { x: r.left + r.width / 2, y: r.top };
+  if (combo >= 2) floatText(lastHit.x, lastHit.y - 26, `${combo}れんぞく！`, true);
+  sound(520 * (1 + combo * 0.08), 1100 * (1 + combo * 0.08));
+
+  if (!state.dex[id]) newQueue.push(id);
+  state.dex[id] = (state.dex[id] || 0) + 1;
+  state.sp += t.sp;
+  state.stock += t.g;
+  state.harvested++;
+  state.salts.splice(idx, 1);
+  tick();
+  if (newQueue.length && !$('newModal').classList.contains('open')) setTimeout(showNew, 500);
+}
+function endCombo() {
+  if (combo >= 3 && lastHit) {
+    const bonus = combo * 2;
+    state.sp += bonus;
+    floatText(lastHit.x, lastHit.y - 50, `れんぞくボーナス +${bonus}SP`, true);
+    sound(880, 1760, 0.25);
+    renderHud(Date.now());
+    save();
+  }
+  combo = 0; lastHit = null;
+}
+
+let dragging = false;
+function harvestAt(x, y) {
+  const el = document.elementFromPoint(x, y)?.closest('.salt');
+  if (el) harvest(+el.dataset.id);
+}
+$('beach').addEventListener('pointerdown', e => { dragging = true; combo = 0; harvestAt(e.clientX, e.clientY); });
+window.addEventListener('pointermove', e => { if (dragging) harvestAt(e.clientX, e.clientY); });
+window.addEventListener('pointerup', () => { if (dragging) endCombo(); dragging = false; });
+window.addEventListener('pointercancel', () => { dragging = false; combo = 0; });
 
 // ---------- まめ知識の吹き出し ----------
 const tipQueue = [];
@@ -495,74 +803,94 @@ function hideTip() {
 }
 $('tip').onclick = hideTip;
 
-// ---------- 収穫 ----------
-let audio;
-function pop(pitch = 1) {
-  try {
-    audio ||= new (window.AudioContext || window.webkitAudioContext)();
-    const o = audio.createOscillator(), g = audio.createGain(), t = audio.currentTime;
-    o.type = 'sine';
-    o.frequency.setValueAtTime(520 * pitch, t);
-    o.frequency.exponentialRampToValueAtTime(1100 * pitch, t + 0.08);
-    g.gain.setValueAtTime(0.15, t);
-    g.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
-    o.connect(g).connect(audio.destination);
-    o.start(t); o.stop(t + 0.16);
-  } catch {}
+// ---------- ストーリー進行 ----------
+let scene = null;
+function playScene(lines, done) {
+  scene = { lines, i: 0, done };
+  $('scene').classList.add('open');
+  showLine();
 }
-
-const newQueue = [];
-function harvest(i) {
-  const s = state.slots[i];
-  if (i >= unlocked() || !s.type || stageOf(s) < 2) return;
-  const id = isDamp(s) ? 'damp' : s.type, t = TYPE[id];
-  const el = cells[i], r = el.getBoundingClientRect();
-
-  // 飛んでいく演出
-  const fly = el.querySelector('.shio').cloneNode(true);
-  Object.assign(fly.style, { left: r.left + r.width * .06 + 'px', top: r.bottom - r.width * .88 + 'px', width: r.width * .88 + 'px' });
-  fly.className = 'shio fly';
-  document.body.appendChild(fly);
-  setTimeout(() => fly.remove(), 700);
-  const plus = document.createElement('div');
-  plus.className = 'plus'; plus.textContent = t.g ? `+${t.g}g` : 'あまい…';
-  Object.assign(plus.style, { left: r.left + r.width / 2 - 18 + 'px', top: r.top + 'px' });
-  document.body.appendChild(plus);
-  setTimeout(() => plus.remove(), 900);
-  pop(t.rank >= 4 ? 1.5 : 1 + Math.random() * .2);
-
-  if (!state.dex[id]) newQueue.push(id);
-  state.dex[id] = (state.dex[id] || 0) + 1;
-  state.sp += t.sp;
-  state.stock += t.g;
-  s.type = null; s.wait = spawnDelay();
-  el._key = '';
-  showTip('first');
-  tick();
-  if (newQueue.length && !$('newModal').classList.contains('open')) setTimeout(showNew, 500);
+function showLine() {
+  const [who, text] = scene.lines[scene.i];
+  const sp = SPEAKERS[who];
+  $('sceneFace').style.display = sp ? '' : 'none';
+  $('sceneFace').innerHTML = sp ? sp.face() : '';
+  $('sceneName').textContent = sp ? sp.name : '';
+  $('sceneBox').classList.toggle('narr', !sp);
+  scene.full = text; scene.shown = 0;
+  clearInterval(scene.timer);
+  scene.timer = setInterval(() => {
+    scene.shown++;
+    $('sceneText').textContent = text.slice(0, scene.shown);
+    if (scene.shown >= text.length) clearInterval(scene.timer);
+  }, 35);
 }
-
-let dragging = false;
-function harvestAt(x, y) {
-  const c = document.elementFromPoint(x, y)?.closest('.cell');
-  if (c) harvest(+c.dataset.i);
-}
-board.addEventListener('pointerdown', e => {
-  dragging = true; harvestAt(e.clientX, e.clientY);
-  if (e.target.closest('.cell.locked')) openModal('shopModal');
+$('scene').addEventListener('click', () => {
+  if (!scene) return;
+  if (scene.shown < scene.full.length) {
+    clearInterval(scene.timer); scene.shown = scene.full.length; $('sceneText').textContent = scene.full; return;
+  }
+  if (++scene.i < scene.lines.length) return showLine();
+  clearInterval(scene.timer);
+  const done = scene.done;
+  scene = null;
+  $('scene').classList.remove('open');
+  done && done();
 });
-window.addEventListener('pointermove', e => { if (dragging) harvestAt(e.clientX, e.clientY); });
-window.addEventListener('pointerup', () => dragging = false);
-window.addEventListener('pointercancel', () => dragging = false);
+
+function startChapter(prefix = []) {
+  const ch = CHAPTERS[state.chapter];
+  if (ch.gift?.teru) state.teru.count += ch.gift.teru;
+  save();
+  playScene([...prefix, ...ch.intro], () => {
+    state.sceneSeen = state.chapter;
+    save(); tick();
+    ch.after && ch.after();
+  });
+}
+function checkChapter() {
+  if (scene) return;
+  const ch = CHAPTERS[state.chapter];
+  if (state.sceneSeen < state.chapter) return startChapter();
+  if (!ch.prog) return;
+  const [cur, max] = ch.prog();
+  if (cur < max) return;
+  const r = ch.reward || {};
+  state.sp += r.sp || 0;
+  state.teru.count += r.teru || 0;
+  const items = [r.sp && `${r.sp} SP`, r.teru && `てるてる坊主 ×${r.teru}`].filter(Boolean).join('、');
+  state.chapter++;
+  sound(660, 1320, 0.4);
+  startChapter([['na', `🎉 「${ch.title.replace(/^.*?　/, '')}」クリア！${items ? `\nごほうび：${items}` : ''}`]]);
+}
 
 // ---------- HUD・モーダル ----------
-function renderHud() {
-  const pct = Math.round(state.rate * 100);
+function renderHud(now) {
   $('sp').textContent = state.sp.toLocaleString();
-  $('rate').textContent = pct;
-  $('rateFill').style.width = pct + '%';
+  $('rate').textContent = pct();
+  $('rateFill').style.width = pct() + '%';
   $('stock').textContent = Math.floor(state.stock);
   $('dexCount').textContent = `${Object.keys(state.dex).length}/${TYPES.length}`;
+
+  const ch = CHAPTERS[state.chapter];
+  $('goalCh').textContent = ch.title;
+  $('goalText').textContent = '🎯 ' + ch.goal;
+  if (ch.prog) {
+    const [cur, max] = ch.prog();
+    $('goalNum').textContent = `${Math.min(cur, max)}${ch.unit || ''} / ${max}${ch.unit || ''}`;
+    $('goalFill').style.width = Math.min(100, cur / max * 100) + '%';
+  } else {
+    $('goalNum').textContent = ''; $('goalFill').style.width = '100%';
+  }
+
+  const t = state.teru, btn = $('teruBtn');
+  btn.classList.toggle('show', state.chapter >= 2);
+  $('teruCount').textContent = t.count;
+  btn.disabled = t.count <= 0;
+  if (t.regenAt) {
+    const left = Math.max(0, t.regenAt - now), m = Math.floor(left / 60000), s = Math.floor(left / 1000) % 60;
+    $('teruRegen').textContent = `つぎ ${m}:${String(s).padStart(2, '0')}`;
+  } else $('teruRegen').textContent = '';
 }
 
 function openModal(id) {
@@ -611,36 +939,34 @@ function renderShop() {
     const u = UPGRADES.find(x => x.id === b.dataset.up), cost = u.cost(state.up[u.id]);
     if (state.sp < cost || state.up[u.id] >= u.max) return;
     state.sp -= cost; state.up[u.id]++;
-    if (u.id === 'field') state.slots[unlocked() - 1].wait = 1000;
     if (TIPS[u.id]) showTip(u.id);
-    pop(1.3); save(); renderShop(); tick();
+    sound(700, 1400); save(); renderShop(); tick();
+    if (u.id === 'shijoka' || u.id === 'house') setTimeout(() => $('shopModal').classList.remove('open'), 300);
   });
 }
 
 // 出典：財務省「令和6年度 塩需給実績」(単位：千トン)
 const JP = { soda: 5819, biz: 1867, home: 115, total: 7802, domestic: 813, imported: 7066 };
 function renderJp() {
-  const pct = n => (n / JP.total * 100);
+  const share = n => n / JP.total * 100;
   const supply = JP.domestic + JP.imported;
-  const my = Math.round(state.rate * 100);
-  const intro = state.rate >= 0.995
-    ? `<p>🎉 <b>わが家の塩は自給率100%！</b><br>では、日本全体ではどうなっているんだろう？</p>`
-    : `<p>わが家の自給率は <b>${my}%</b>。<br>では、日本全体ではどうなっているんだろう？</p>`;
+  const tipKeys = Object.keys(TIPS);
   $('jpPanel').innerHTML = `<button class="close" data-close>×</button>
-    <h2>🗾 日本の塩のいま</h2>${intro}
+    <h2>🗾 日本の塩のいま</h2>
+    <p>わが家の自給率は <b>${pct()}%</b>。<br>では、日本全体ではどうなっているんだろう？</p>
 
     <h3>日本でつくる塩と、外国から来る塩</h3>
-    <div class="stack" id="bar1">
+    <div class="stack">
       <div style="background:var(--self)" data-w="${JP.domestic / supply * 100}">国産</div>
       <div style="background:var(--import)" data-w="${JP.imported / supply * 100}">輸入 約90%</div>
     </div>
     <p>日本で使う塩は1年に約<b>780万トン</b>。でも国内でつくっているのは約81万トン、<b>自給率はたった約10%</b>なんだ。</p>
 
     <h3>その塩、なにに使われているの？</h3>
-    <div class="stack" id="bar2">
-      <div style="background:#7a8fa6" data-w="${pct(JP.soda)}">工業用 約75%</div>
-      <div style="background:#c9a66b" data-w="${pct(JP.biz)}">業務用 24%</div>
-      <div style="background:var(--accent)" data-w="${Math.max(pct(JP.home), 2)}"></div>
+    <div class="stack">
+      <div style="background:#7a8fa6" data-w="${share(JP.soda)}">工業用 約75%</div>
+      <div style="background:#c9a66b" data-w="${share(JP.biz)}">業務用 24%</div>
+      <div style="background:var(--accent)" data-w="${Math.max(share(JP.home), 2)}"></div>
     </div>
     <div class="legend">
       <div><i style="background:#7a8fa6"></i>工業用：ガラス・紙・せっけん・水道の消毒などの原料（ほぼ全部が輸入）</div>
@@ -654,8 +980,8 @@ function renderJp() {
       燃料も電気もいらない天日塩を、雨の多い日本でも工夫してつくれたら…？ ☀️🌬️
     </div>
 
-    <h3>集めたまめ知識（${Object.keys(TIPS).filter(k => k !== 'full' && state.tips[k]).length}/${Object.keys(TIPS).length - 1}）</h3>
-    <ul class="mame-list">${Object.entries(TIPS).filter(([k]) => state.tips[k] && k !== 'full').map(([, v]) => `<li>${v}</li>`).join('') || '<li>塩を育てていると見つかるよ</li>'}</ul>
+    <h3>集めたまめ知識（${tipKeys.filter(k => state.tips[k]).length}/${tipKeys.length}）</h3>
+    <ul class="mame-list">${tipKeys.filter(k => state.tips[k]).map(k => `<li>${TIPS[k]}</li>`).join('') || '<li>塩を育てていると見つかるよ</li>'}</ul>
 
     <div class="source">出典：財務省「令和6年度 塩需給実績」。数字は四捨五入した約数です。</div>`;
   requestAnimationFrame(() => requestAnimationFrame(() =>
@@ -663,15 +989,15 @@ function renderJp() {
 }
 
 $('reset').onclick = () => {
-  if (!confirm('本当にリセットしますか？図鑑もポイントも消えます。')) return;
+  if (!confirm('本当にリセットしますか？ストーリーも図鑑もポイントも、最初からになります。')) return;
   state = freshState(); save();
-  cells.forEach(c => c._key = '');
   lastWeather = null;
   $('shopModal').classList.remove('open');
   tick();
 };
 
 function showNew() {
+  if (scene) return setTimeout(showNew, 800);
   const id = newQueue.shift();
   if (!id) return;
   const t = TYPE[id];
@@ -680,7 +1006,7 @@ function showNew() {
     <h3>${t.name}</h3><div class="stars">${stars(t.rank)}</div>
     <p>${t.desc}</p><button class="btn" data-close>やったー</button>`;
   $('newModal').classList.add('open');
-  pop(1.6);
+  sound(780, 1560, 0.3);
 }
 
 tick();
