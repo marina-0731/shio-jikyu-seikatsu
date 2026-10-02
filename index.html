@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>しお栽培キット</title>
+<style>
+  :root {
+    --sea: #7cc4e4;
+    --sea-deep: #4a9cc4;
+    --pan: #e9dcc0;
+    --pan-line: #cdbb94;
+    --cell: #f4ead4;
+    --ink: #4a3b2a;
+    --accent: #e8735a;
+    --card: #fffaf0;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: linear-gradient(#bfe6f7 0%, #e9f6fb 40%, #f6efe0 100%);
+    color: var(--ink);
+    font-family: "Hiragino Maru Gothic ProN", "Rounded Mplus 1c", "Hiragino Sans", sans-serif;
+    display: flex; justify-content: center;
+    user-select: none; -webkit-user-select: none;
+    overflow: hidden;
+  }
+  #app { width: 100%; max-width: 520px; height: 100%; display: flex; flex-direction: column; padding: 12px 16px 16px; gap: 12px; }
+
+  header { display: flex; align-items: center; justify-content: space-between; }
+  h1 { font-size: 22px; margin: 0; letter-spacing: .05em; }
+  h1 small { display: block; font-size: 11px; font-weight: normal; opacity: .6; letter-spacing: .1em; }
+  .sp { background: var(--card); border-radius: 999px; padding: 6px 14px; font-weight: bold; box-shadow: 0 2px 0 #0001; }
+  .sp b { font-size: 20px; color: var(--accent); }
+
+  /* 海と塩田 */
+  #stage { flex: 1; display: flex; flex-direction: column; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 0 #0000001a; min-height: 0; }
+  .sea { height: 56px; background: linear-gradient(var(--sea), var(--sea-deep)); position: relative; overflow: hidden; flex-shrink: 0; }
+  .sea::before, .sea::after {
+    content: ""; position: absolute; left: -50%; width: 200%; height: 20px; bottom: -6px;
+    background: radial-gradient(circle at 10px -4px, transparent 12px, var(--pan) 13px) 0 0 / 26px 20px repeat-x;
+    animation: wave 6s linear infinite;
+  }
+  .sea::after { bottom: 8px; opacity: .25; animation-duration: 9s; animation-direction: reverse; }
+  @keyframes wave { to { transform: translateX(26px); } }
+  .sun { position: absolute; right: 18px; top: 8px; width: 30px; height: 30px; border-radius: 50%; background: #ffd65a; box-shadow: 0 0 0 6px #ffd65a55; }
+
+  #board {
+    flex: 1; background: var(--pan); padding: 12px;
+    display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(3, 1fr); gap: 8px;
+    touch-action: none; min-height: 0;
+  }
+  .cell {
+    background: var(--cell); border-radius: 12px; border: 2px solid var(--pan-line);
+    position: relative; display: flex; align-items: flex-end; justify-content: center;
+    min-height: 0; overflow: visible;
+  }
+  .cell.locked { background: #d8c9a6; border-style: dashed; opacity: .55; align-items: center; font-size: 18px; }
+  .cell .water { position: absolute; inset: 30% 10% 8%; border-radius: 50%; background: #a9d8ec55; }
+  .shio { width: 88%; aspect-ratio: 1; position: relative; transform-origin: 50% 90%; transition: transform .4s cubic-bezier(.3,1.6,.5,1); pointer-events: none; }
+  .shio svg { width: 100%; height: 100%; display: block; overflow: visible; }
+  .s0 { transform: scale(.35); }
+  .s1 { transform: scale(.65); }
+  .s2 { transform: scale(1); animation: bob 1.6s ease-in-out infinite; }
+  .s2.damp { animation: none; }
+  @keyframes bob { 50% { transform: translateY(-4px) scale(1.02, .98); } }
+  .cell.ready { box-shadow: inset 0 0 0 2px #fff, 0 0 10px #fff8; }
+
+  .fly { position: fixed; pointer-events: none; z-index: 50; animation: fly .7s ease-in forwards; }
+  @keyframes fly { to { transform: translateY(-120px) scale(.4) rotate(20deg); opacity: 0; } }
+  .plus { position: fixed; pointer-events: none; z-index: 51; font-weight: bold; color: var(--accent); font-size: 20px; text-shadow: 0 2px 0 #fff; animation: plus .9s ease-out forwards; }
+  @keyframes plus { to { transform: translateY(-50px); opacity: 0; } }
+
+  .hint { text-align: center; font-size: 12px; opacity: .6; margin: -4px 0 0; }
+
+  nav { display: flex; gap: 10px; }
+  nav button, .btn {
+    flex: 1; font: inherit; font-weight: bold; font-size: 16px; color: var(--ink);
+    background: var(--card); border: none; border-radius: 14px; padding: 12px; cursor: pointer;
+    box-shadow: 0 4px 0 #0000001f; transition: transform .1s;
+  }
+  nav button:active, .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #0000001f; }
+
+  /* モーダル */
+  .modal { position: fixed; inset: 0; background: #0006; display: none; align-items: center; justify-content: center; z-index: 100; padding: 16px; }
+  .modal.open { display: flex; }
+  .panel { background: var(--card); border-radius: 20px; width: 100%; max-width: 480px; max-height: 88vh; overflow: auto; padding: 18px; position: relative; }
+  .panel h2 { margin: 0 0 12px; font-size: 18px; }
+  .close { position: absolute; right: 12px; top: 10px; background: none; border: none; font-size: 24px; cursor: pointer; color: var(--ink); }
+
+  .dex { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 8px; }
+  .dex .card { background: #fff; border-radius: 12px; padding: 6px; text-align: center; font-size: 11px; cursor: pointer; border: 2px solid transparent; }
+  .dex .card.sel { border-color: var(--accent); }
+  .dex .card .shio { width: 64px; margin: 0 auto; }
+  .dex .card.unknown .shio { filter: brightness(0); opacity: .18; }
+  .stars { color: #f0b400; font-size: 10px; letter-spacing: -1px; }
+  .detail { margin-top: 12px; background: #fff; border-radius: 12px; padding: 12px; font-size: 13px; line-height: 1.6; min-height: 60px; }
+
+  .shop-item { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; }
+  .shop-item .info { flex: 1; font-size: 13px; }
+  .shop-item .info b { font-size: 15px; }
+  .shop-item button { flex: none; font-size: 13px; padding: 8px 12px; background: var(--accent); color: #fff; }
+  .shop-item button:disabled { background: #ccc; box-shadow: none; }
+  .reset { margin-top: 12px; background: none; border: none; color: #999; font-size: 12px; text-decoration: underline; cursor: pointer; }
+
+  .newcard { text-align: center; }
+  .newcard .label { display: inline-block; background: var(--accent); color: #fff; border-radius: 999px; padding: 2px 12px; font-weight: bold; font-size: 13px; }
+  .newcard .shio { width: 140px; margin: 10px auto; }
+  .newcard h3 { margin: 4px 0; font-size: 22px; }
+  .newcard p { font-size: 14px; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>しお栽培キット<small>SALT GROWING KIT</small></h1>
+    <div class="sp"><b id="sp">0</b> SP</div>
+  </header>
+
+  <div id="stage">
+    <div class="sea"><div class="sun"></div></div>
+    <div id="board"></div>
+  </div>
+  <p class="hint">育った塩を タップ / なぞって 収穫しよう</p>
+
+  <nav>
+    <button id="openDex">📖 ずかん <span id="dexCount"></span></button>
+    <button id="openShop">🛠 しおや</button>
+  </nav>
+</div>
+
+<div class="modal" id="dexModal"><div class="panel">
+  <button class="close" data-close>×</button>
+  <h2>しお図鑑</h2>
+  <div class="dex" id="dexGrid"></div>
+  <div class="detail" id="dexDetail">塩をタップすると説明が見られるよ</div>
+</div></div>
+
+<div class="modal" id="shopModal"><div class="panel">
+  <button class="close" data-close>×</button>
+  <h2>しおや（強化）</h2>
+  <div id="shopList"></div>
+  <button class="reset" id="reset">データをリセット</button>
+</div></div>
+
+<div class="modal" id="newModal"><div class="panel newcard" id="newCard"></div></div>
+
+<script>
+// ---------- 塩の種類 ----------
+// colors: [上面, 左面, 右面], w: 出現の重み, sp: 収穫ポイント
+const TYPES = [
+  { id: 'futsu',  name: 'ふつうのしお',   w: 50,  sp: 1,   rank: 1, colors: ['#ffffff', '#eef2f5', '#d9e1e8'], face: 'normal',
+    desc: 'どこにでもいる塩。おにぎりにかけられるのが夢。' },
+  { id: 'ara',    name: 'あらじお',       w: 25,  sp: 2,   rank: 1, colors: ['#fbf8f0', '#ece5d4', '#d8cfb8'], face: 'normal', grains: true,
+    desc: 'ちょっと粒が大きめ。ステーキの上が定位置だと思っている。' },
+  { id: 'pink',   name: 'ピンク岩塩',     w: 9,   sp: 5,   rank: 2, colors: ['#ffd9df', '#f6b6c2', '#e696a6'], face: 'happy',
+    desc: 'ヒマラヤ出身と言い張っているが、ここ生まれ。' },
+  { id: 'mo',     name: '藻塩',           w: 8,   sp: 5,   rank: 2, colors: ['#efe0c4', '#dcc59c', '#c2a878'], face: 'normal', grains: true,
+    desc: '海藻のうまみをまとった塩。ちょっと磯くさいのが自慢。' },
+  { id: 'yuki',   name: '雪塩',           w: 6,   sp: 8,   rank: 3, colors: ['#ffffff', '#f4fbff', '#e2f1fb'], face: 'happy', snow: true,
+    desc: 'パウダーみたいにふわふわ。強くなでると消える。' },
+  { id: 'herb',   name: 'ハーブソルト',   w: 4,   sp: 10,  rank: 3, colors: ['#eef5e2', '#d3e6b8', '#b4cf92'], face: 'happy', grains: '#6a9a3a',
+    desc: 'おしゃれ好き。サラダの上でしか本気を出さない。' },
+  { id: 'take',   name: '竹塩',           w: 3,   sp: 12,  rank: 3, colors: ['#e2dbe8', '#c6b8d4', '#a796bb'], face: 'normal',
+    desc: '竹の筒で何度も焼かれた、修行を積んだ塩。' },
+  { id: 'kuro',   name: '黒い溶岩塩',     w: 2.5, sp: 15,  rank: 4, colors: ['#5a5560', '#403b46', '#2c2832'], face: 'cool',
+    desc: '見た目はこわいけど、ゆで卵にかけると優しい味。' },
+  { id: 'jii',    name: 'しおじいさん',   w: 1.5, sp: 30,  rank: 4, colors: ['#f6f3ec', '#e4ddcf', '#cfc5b2'], face: 'old',
+    desc: '塩田に何十年もいる長老。「わしの若いころは海じゃった」' },
+  { id: 'sato',   name: 'さとう',         w: 2,   sp: 0,   rank: 3, colors: ['#ffffff', '#f2f0ff', '#dcdaf0'], face: 'sweat',
+    desc: 'なぜか紛れこんでいた砂糖。本人は塩のつもり。ポイントにならない。' },
+  { id: 'gold',   name: '金の塩',         w: 0.4, sp: 100, rank: 5, colors: ['#ffe98a', '#f5c842', '#d9a51c'], face: 'happy', shine: true,
+    desc: '伝説の塩。見つけた人には一生しょっぱい幸運が訪れる。' },
+  { id: 'damp',   name: 'しけった塩',     w: 0,   sp: 1,   rank: 2, colors: ['#e3edf2', '#c8d8e2', '#a9bfcc'], face: 'droopy',
+    desc: '放っておかれて湿気てしまった塩。早く収穫してあげよう。' },
+];
+const TYPE = Object.fromEntries(TYPES.map(t => [t.id, t]));
+
+const BASE_GROW = 40_000;     // 成長にかかる時間 (ms)
+const DAMP_AFTER = 180_000;   // 育ってから湿気るまで (ms)
+const MAX_SLOTS = 15;
+
+// ---------- 強化 ----------
+const UPGRADES = [
+  { id: 'sun',   name: '☀️ 太陽のちから', desc: '塩が育つスピードが上がる', max: 5,
+    cost: lv => 30 * 2 ** lv },
+  { id: 'field', name: '🧱 塩田をひろげる', desc: '塩が育つ場所が1マス増える', max: 9,
+    cost: lv => Math.round(40 * (lv + 1) ** 1.6) },
+  { id: 'rare',  name: '🌊 海水のめぐみ', desc: 'めずらしい塩が出やすくなる', max: 5,
+    cost: lv => 80 * 2 ** lv },
+];
+
+// ---------- 状態 ----------
+const KEY = 'shio-saibai-v1';
+function freshState() {
+  const now = Date.now();
+  return {
+    sp: 0, dex: {},
+    up: { sun: 0, field: 0, rare: 0 },
+    slots: Array.from({ length: MAX_SLOTS }, (_, i) => ({ type: null, born: 0, spawnAt: now + 800 + i * 400 })),
+  };
+}
+let state;
+try { state = JSON.parse(localStorage.getItem(KEY)) || freshState(); } catch { state = freshState(); }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} }
+
+const growTime = () => BASE_GROW * 0.78 ** state.up.sun;
+const unlocked = () => 6 + state.up.field;
+const spawnDelay = () => (3000 + Math.random() * 7000) * 0.85 ** state.up.sun;
+
+function pickType() {
+  const boost = 1 + 0.5 * state.up.rare;
+  const pool = TYPES.filter(t => t.w > 0).map(t => [t, t.w < 10 ? t.w * boost : t.w]);
+  let r = Math.random() * pool.reduce((s, [, w]) => s + w, 0);
+  for (const [t, w] of pool) if ((r -= w) < 0) return t.id;
+  return 'futsu';
+}
+
+// 0: 芽, 1: 子ども, 2: 収穫どき
+function stageOf(s, now) {
+  const age = now - s.born, g = growTime();
+  return age >= g ? 2 : age >= g / 2 ? 1 : 0;
+}
+const isDamp = (s, now) => now - s.born >= growTime() + DAMP_AFTER;
+
+// ---------- 塩のキャラ (等角の立方体 + 顔) ----------
+function shioSVG(id, stage = 2, damp = false) {
+  const t = TYPE[damp ? 'damp' : id];
+  const [top, left, right] = t.colors;
+  const line = '#5a4a3a';
+  let deco = '', face = '';
+
+  if (t.grains) {
+    const g = typeof t.grains === 'string' ? t.grains : '#c8bca0';
+    deco += [[30, 30], [60, 22], [70, 36], [22, 60], [78, 62], [40, 82]]
+      .map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.4" fill="${g}"/>`).join('');
+  }
+  if (t.snow) deco += `<circle cx="50" cy="12" r="5" fill="#fff"/><circle cx="40" cy="15" r="4" fill="#fff"/><circle cx="60" cy="15" r="4" fill="#fff"/>`;
+  if (t.shine) deco += ['M8 18 l3 -8 l3 8 l8 3 l-8 3 l-3 8 l-3 -8 l-8 -3z', 'M86 6 l2 -5 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2z', 'M90 80 l2 -5 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2z']
+    .map(d => `<path d="${d}" fill="#ffd400"/>`).join('');
+
+  const blush = `<ellipse cx="29" cy="72" rx="6" ry="3.5" fill="#ff8a9a" opacity=".45"/><ellipse cx="71" cy="72" rx="6" ry="3.5" fill="#ff8a9a" opacity=".45"/>`;
+  const eyes = `<circle cx="38" cy="64" r="3.6" fill="${line}"/><circle cx="62" cy="64" r="3.6" fill="${line}"/><circle cx="39.2" cy="62.8" r="1.2" fill="#fff"/><circle cx="63.2" cy="62.8" r="1.2" fill="#fff"/>`;
+  const mouth = `<path d="M46 71 q4 4 8 0" stroke="${line}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`;
+
+  if (stage === 0) face = '';
+  else if (stage === 1) face = `<path d="M33 64 q5 4 10 0 M57 64 q5 4 10 0" stroke="${line}" stroke-width="2.2" fill="none" stroke-linecap="round"/>${blush}`;
+  else switch (damp ? 'droopy' : t.face) {
+    case 'happy': face = `<path d="M33 66 l5 -5 l5 5 M57 66 l5 -5 l5 5" stroke="${line}" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M44 70 q6 8 12 0z" fill="${line}"/>${blush}`; break;
+    case 'sweat': face = eyes + `<path d="M45 73 q2.5 -3 5 0 q2.5 3 5 0" stroke="${line}" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M80 40 q5 8 0 11 q-5 -3 0 -11z" fill="#8fd0f5"/>${blush}`; break;
+    case 'cool': face = `<path d="M31 62 h14 M55 62 h14" stroke="#fff" stroke-width="3" stroke-linecap="round"/><path d="M45 72 h10" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>`; break;
+    case 'old': face = `<path d="M31 57 q7 -4 13 0 M56 57 q7 -4 13 0" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M33 64 q5 3 10 0 M57 64 q5 3 10 0" stroke="${line}" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M50 70 q-9 -2 -14 6 q8 1 14 -3 q6 4 14 3 q-5 -8 -14 -6z" fill="#fff" stroke="#bbb" stroke-width="1"/>`; break;
+    case 'droopy': face = `<path d="M33 64 h9 M58 64 h9" stroke="${line}" stroke-width="2.2" stroke-linecap="round"/><path d="M43 74 q3.5 -3 7 0 q3.5 3 7 0" stroke="${line}" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M22 84 q3 6 0 8 q-3 -2 0 -8z M76 86 q3 6 0 8 q-3 -2 0 -8z" fill="#8fc6e0"/>`; break;
+    default: face = eyes + mouth + blush;
+  }
+
+  const shadow = `<ellipse cx="50" cy="95" rx="${30}" ry="4" fill="#00000018"/>`;
+  return `<svg viewBox="0 0 100 100">${shadow}
+    <polygon points="50,10 88,30 50,52 12,30" fill="${top}" stroke="${line}" stroke-width="2" stroke-linejoin="round"/>
+    <polygon points="12,30 50,52 50,92 12,72" fill="${left}" stroke="${line}" stroke-width="2" stroke-linejoin="round"/>
+    <polygon points="88,30 88,72 50,92 50,52" fill="${right}" stroke="${line}" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M20 31 L50 17" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".8"/>
+    ${deco}${face}</svg>`;
+}
+
+// ---------- 盤面 ----------
+const board = document.getElementById('board');
+const cells = Array.from({ length: MAX_SLOTS }, (_, i) => {
+  const el = document.createElement('div');
+  el.className = 'cell'; el.dataset.i = i; el._key = '';
+  board.appendChild(el);
+  return el;
+});
+
+function tick() {
+  const now = Date.now();
+  let changed = false;
+  state.slots.forEach((s, i) => {
+    const el = cells[i];
+    if (i >= unlocked()) {
+      if (el._key !== 'L') { el._key = 'L'; el.className = 'cell locked'; el.innerHTML = '🔒'; }
+      return;
+    }
+    if (!s.type && now >= s.spawnAt) { s.type = pickType(); s.born = s.spawnAt; changed = true; }
+    if (!s.type) {
+      if (el._key !== 'E') { el._key = 'E'; el.className = 'cell'; el.innerHTML = '<div class="water"></div>'; }
+      return;
+    }
+    const st = stageOf(s, now), damp = st === 2 && isDamp(s, now);
+    const key = `${s.type}-${st}-${damp}`;
+    if (el._key !== key) {
+      el._key = key;
+      el.className = 'cell' + (st === 2 ? ' ready' : '');
+      el.innerHTML = `<div class="water"></div><div class="shio s${st}${damp ? ' damp' : ''}">${shioSVG(s.type, st, damp)}</div>`;
+    }
+  });
+  if (changed) save();
+}
+
+// ---------- 収穫 ----------
+let audio;
+function pop(pitch = 1) {
+  try {
+    audio ||= new (window.AudioContext || window.webkitAudioContext)();
+    const o = audio.createOscillator(), g = audio.createGain(), t = audio.currentTime;
+    o.type = 'sine';
+    o.frequency.setValueAtTime(520 * pitch, t);
+    o.frequency.exponentialRampToValueAtTime(1100 * pitch, t + 0.08);
+    g.gain.setValueAtTime(0.15, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+    o.connect(g).connect(audio.destination);
+    o.start(t); o.stop(t + 0.16);
+  } catch {}
+}
+
+const newQueue = [];
+function harvest(i) {
+  const s = state.slots[i], now = Date.now();
+  if (i >= unlocked() || !s.type || stageOf(s, now) < 2) return;
+  const id = isDamp(s, now) ? 'damp' : s.type, t = TYPE[id];
+  const el = cells[i], r = el.getBoundingClientRect();
+
+  // 飛んでいく演出
+  const fly = el.querySelector('.shio').cloneNode(true);
+  Object.assign(fly.style, { left: r.left + r.width * .06 + 'px', top: r.bottom - r.width * .88 + 'px', width: r.width * .88 + 'px' });
+  fly.className = 'shio fly';
+  document.body.appendChild(fly);
+  setTimeout(() => fly.remove(), 700);
+  const plus = document.createElement('div');
+  plus.className = 'plus'; plus.textContent = t.sp ? `+${t.sp}` : 'あまい…';
+  Object.assign(plus.style, { left: r.left + r.width / 2 - 14 + 'px', top: r.top + 'px' });
+  document.body.appendChild(plus);
+  setTimeout(() => plus.remove(), 900);
+  pop(t.rank >= 4 ? 1.5 : 1 + Math.random() * .2);
+
+  if (!state.dex[id]) newQueue.push(id);
+  state.dex[id] = (state.dex[id] || 0) + 1;
+  state.sp += t.sp;
+  s.type = null; s.spawnAt = now + spawnDelay();
+  el._key = '';
+  save(); tick(); renderHud();
+  if (newQueue.length && !document.getElementById('newModal').classList.contains('open')) setTimeout(showNew, 500);
+}
+
+let dragging = false;
+function harvestAt(x, y) {
+  const c = document.elementFromPoint(x, y)?.closest('.cell');
+  if (c) harvest(+c.dataset.i);
+}
+board.addEventListener('pointerdown', e => {
+  dragging = true; harvestAt(e.clientX, e.clientY);
+  if (e.target.closest('.cell.locked')) openModal('shopModal');
+});
+window.addEventListener('pointermove', e => { if (dragging) harvestAt(e.clientX, e.clientY); });
+window.addEventListener('pointerup', () => dragging = false);
+window.addEventListener('pointercancel', () => dragging = false);
+
+// ---------- HUD・モーダル ----------
+const discoverable = TYPES.length;
+function renderHud() {
+  document.getElementById('sp').textContent = state.sp.toLocaleString();
+  document.getElementById('dexCount').textContent = `${Object.keys(state.dex).length}/${discoverable}`;
+}
+
+function openModal(id) {
+  if (id === 'dexModal') renderDex();
+  if (id === 'shopModal') renderShop();
+  document.getElementById(id).classList.add('open');
+}
+document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => {
+  if (e.target === m || e.target.hasAttribute('data-close')) {
+    m.classList.remove('open');
+    if (m.id === 'newModal' && newQueue.length) setTimeout(showNew, 200);
+  }
+}));
+document.getElementById('openDex').onclick = () => openModal('dexModal');
+document.getElementById('openShop').onclick = () => openModal('shopModal');
+
+const stars = n => '★'.repeat(n) + '☆'.repeat(5 - n);
+function renderDex() {
+  const grid = document.getElementById('dexGrid');
+  grid.innerHTML = TYPES.map(t => {
+    const n = state.dex[t.id];
+    return `<div class="card ${n ? '' : 'unknown'}" data-id="${t.id}">
+      <div class="shio">${shioSVG(t.id === 'damp' ? 'futsu' : t.id, 2, t.id === 'damp')}</div>
+      <div>${n ? t.name : '？？？'}</div>
+      <div class="stars">${stars(t.rank)}</div></div>`;
+  }).join('');
+  grid.querySelectorAll('.card').forEach(c => c.onclick = () => {
+    grid.querySelectorAll('.card').forEach(x => x.classList.remove('sel'));
+    c.classList.add('sel');
+    const t = TYPE[c.dataset.id], n = state.dex[t.id];
+    document.getElementById('dexDetail').innerHTML = n
+      ? `<b>${t.name}</b>　<span class="stars">${stars(t.rank)}</span><br>${t.desc}<br><small>収穫した数：${n}　／　${t.sp} SP</small>`
+      : 'まだ見つけていない塩。' + (t.id === 'damp' ? '<br><small>ヒント：育った塩をしばらく放っておくと…？</small>' : '');
+  });
+}
+
+function renderShop() {
+  document.getElementById('shopList').innerHTML = UPGRADES.map(u => {
+    const lv = state.up[u.id], maxed = lv >= u.max, cost = u.cost(lv);
+    return `<div class="shop-item"><div class="info"><b>${u.name}</b> Lv.${lv}${maxed ? ' (MAX)' : ''}<br>${u.desc}</div>
+      <button class="btn" data-up="${u.id}" ${maxed || state.sp < cost ? 'disabled' : ''}>${maxed ? 'MAX' : cost + ' SP'}</button></div>`;
+  }).join('');
+  document.querySelectorAll('[data-up]').forEach(b => b.onclick = () => {
+    const u = UPGRADES.find(x => x.id === b.dataset.up), cost = u.cost(state.up[u.id]);
+    if (state.sp < cost || state.up[u.id] >= u.max) return;
+    state.sp -= cost; state.up[u.id]++;
+    if (u.id === 'field') state.slots[unlocked() - 1].spawnAt = Date.now() + 1000;
+    pop(1.3); save(); renderShop(); renderHud(); tick();
+  });
+}
+document.getElementById('reset').onclick = () => {
+  if (!confirm('本当にリセットしますか？図鑑もポイントも消えます。')) return;
+  state = freshState(); save();
+  cells.forEach(c => c._key = '');
+  document.getElementById('shopModal').classList.remove('open');
+  renderHud(); tick();
+};
+
+function showNew() {
+  const id = newQueue.shift();
+  if (!id) return;
+  const t = TYPE[id];
+  document.getElementById('newCard').innerHTML = `<span class="label">NEW!</span>
+    <div class="shio">${shioSVG(id === 'damp' ? 'futsu' : id, 2, id === 'damp')}</div>
+    <h3>${t.name}</h3><div class="stars">${stars(t.rank)}</div>
+    <p>${t.desc}</p><button class="btn" data-close>やったー</button>`;
+  document.getElementById('newModal').classList.add('open');
+  pop(1.6);
+}
+
+renderHud();
+tick();
+setInterval(tick, 500);
+</script>
+</body>
+</html>
