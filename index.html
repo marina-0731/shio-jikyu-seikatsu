@@ -9,7 +9,7 @@
     --sea: #7cc4e4;
     --sea-deep: #4a9cc4;
     --sand: #f1e2bf;
-    --sand-wet: #b99d6c;
+    --sand-wet: #a3845a;
     --ink: #4a3b2a;
     --accent: #e8735a;
     --card: #fffaf0;
@@ -79,8 +79,16 @@
       var(--sand);
     transition: filter 1s;
   }
-  #wet { position: absolute; inset: 0; background: var(--sand-wet); opacity: 0; transition: opacity .8s; pointer-events: none;
-    mask: radial-gradient(ellipse 120% 100% at 50% 0%, #000 55%, transparent 100%); -webkit-mask: radial-gradient(ellipse 120% 100% at 50% 0%, #000 55%, transparent 100%); }
+  #wet { position: absolute; inset: 0; opacity: 0; transition: opacity .8s; pointer-events: none;
+    background:
+      linear-gradient(115deg, transparent 35%, #ffffff55 47%, transparent 58%) 0 0 / 250% 100%,
+      radial-gradient(ellipse 40px 9px at 18% 38%, #8fd0f0aa, transparent),
+      radial-gradient(ellipse 54px 11px at 72% 58%, #8fd0f0aa, transparent),
+      radial-gradient(ellipse 34px 8px at 40% 82%, #8fd0f0aa, transparent),
+      radial-gradient(ellipse 30px 7px at 86% 24%, #8fd0f0aa, transparent),
+      var(--sand-wet);
+    animation: sheen 5s linear infinite; }
+  @keyframes sheen { to { background-position: -250% 0, 0 0, 0 0, 0 0, 0 0, 0 0; } }
   #salts { position: absolute; inset: 0; }
   .salt { position: absolute; width: 18%; max-width: 92px; aspect-ratio: 1; transform-origin: 50% 90%; transition: transform .5s linear; }
   .salt .shio { width: 100%; height: 100%; pointer-events: none; animation: popin .4s cubic-bezier(.3,1.6,.5,1); }
@@ -90,7 +98,7 @@
   @keyframes bob { 50% { transform: translateY(-4px) scale(1.02, .98); } }
   .shio svg { width: 100%; height: 100%; display: block; overflow: visible; }
 
-  .wetgauge { position: absolute; left: 10px; top: 8px; z-index: 120; background: #ffffffc0; border-radius: 999px; padding: 2px 8px; font-size: 11px; display: flex; align-items: center; gap: 5px; pointer-events: none; }
+  .wetgauge { position: absolute; left: 10px; top: 8px; z-index: 120; background: #fffffff0; font-weight: bold; box-shadow: 0 2px 6px #0002; border-radius: 999px; padding: 2px 8px; font-size: 11px; display: flex; align-items: center; gap: 5px; pointer-events: none; }
   .wetgauge span { width: 44px; height: 5px; background: #0001; border-radius: 3px; overflow: hidden; }
   .wetgauge i { display: block; height: 100%; background: var(--sea-deep); transition: width .5s; }
 
@@ -110,17 +118,32 @@
   .w-wind .fx.wind { opacity: 1; }
   .fx.wind { background: repeating-linear-gradient(0deg, transparent 0 46px, #ffffff99 46px 48px) 0 0 / 140px 100%; -webkit-mask: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent) 0 0 / 140px 100%; mask: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent) 0 0 / 140px 100%; animation: wind 1.2s linear infinite; }
   @keyframes wind { to { background-position: 140px 0; -webkit-mask-position: 140px 0; mask-position: 140px 0; } }
-  .w-rain #beach, .w-rain .sea { filter: brightness(.82) saturate(.7); }
-  .w-cloud #beach, .w-cloud .sea { filter: brightness(.93) saturate(.85); }
+  .w-rain .sea { filter: brightness(.75) saturate(.6); }
+  .w-cloud .sea { filter: brightness(.9) saturate(.8); }
+  .w-rain #beach { filter: saturate(.85); }
   .teru-on .sea { filter: brightness(1.08) saturate(1.2); }
 
-  /* てるてる坊主ボタン */
-  .teru-btn { position: absolute; right: 10px; bottom: 24px; z-index: 135; width: 58px; height: 58px; border-radius: 50%; border: none; background: #fff; box-shadow: 0 4px 0 #0002; cursor: pointer; padding: 4px; display: none; }
-  .teru-btn.show { display: block; }
-  .teru-btn svg { width: 100%; height: 100%; }
-  .teru-btn:disabled { opacity: .55; }
-  .teru-btn .badge { position: absolute; right: -4px; top: -4px; background: var(--accent); color: #fff; font-size: 12px; font-weight: bold; border-radius: 999px; min-width: 20px; height: 20px; line-height: 20px; text-align: center; padding: 0 5px; }
-  .teru-btn .regen { position: absolute; left: 50%; bottom: -16px; transform: translateX(-50%); font-size: 9px; white-space: nowrap; background: #fffc; border-radius: 6px; padding: 0 4px; }
+  /* てるてる坊主の持ち数 */
+  .teru-chip { position: absolute; right: 10px; top: 8px; z-index: 120; background: #fffffff0; border-radius: 999px; padding: 2px 8px 2px 4px; font-size: 11px; font-weight: bold; display: none; align-items: center; gap: 2px; box-shadow: 0 2px 6px #0002; pointer-events: none; }
+  .teru-chip.show { display: flex; }
+  .teru-chip span { width: 16px; height: 22px; display: block; }
+  .teru-chip svg { width: 100%; height: 100%; }
+  .teru-chip small { font-weight: normal; opacity: .65; margin-left: 4px; }
+
+  /* バケツをえらぶ */
+  .bucket-opts { display: flex; flex-direction: column; gap: 8px; }
+  .bucket-opt { display: flex; align-items: center; gap: 12px; text-align: left; font: inherit; color: var(--ink); background: #fff; border: 2px solid #eee; border-radius: 14px; padding: 10px 12px; cursor: pointer; }
+  .bucket-opt:active { border-color: var(--accent); }
+  .bucket-opt .ico { font-size: 30px; width: 44px; text-align: center; flex: none; }
+  .bucket-opt b { font-size: 16px; }
+  .bucket-opt small { display: block; font-size: 12px; opacity: .75; margin-top: 2px; }
+  .bucket-note { font-size: 12px; background: #eaf6fb; border-radius: 10px; padding: 8px 10px; margin-bottom: 10px; line-height: 1.6; }
+  .teru-ask { text-align: center; }
+  .teru-ask .big { width: 70px; height: 92px; margin: 4px auto 6px; animation: swing 1.6s ease-in-out infinite alternate; transform-origin: 50% 0; }
+  .teru-ask .big svg { width: 100%; height: 100%; }
+  .teru-ask p { font-size: 14px; line-height: 1.7; margin: 6px 0 14px; }
+  .teru-ask .row { display: flex; gap: 8px; }
+  .teru-ask .yes { background: var(--accent); color: #fff; }
 
   .fly { position: fixed; pointer-events: none; z-index: 50; animation: fly .7s ease-in forwards; }
   @keyframes fly { to { transform: translateY(-120px) scale(.4) rotate(20deg); opacity: 0; } }
@@ -232,9 +255,9 @@
     <div id="beach">
       <div id="wet"></div>
       <div id="salts"></div>
-      <div class="wetgauge">💧<span><i id="wetFill"></i></span></div>
+      <div class="wetgauge">💧<span><i id="wetFill"></i></span><b id="wetText">からから</b></div>
       <div class="splash-hint" id="splashHint">⬆️ 海をタップして海水をまこう</div>
-      <button class="teru-btn" id="teruBtn"><span id="teruIcon"></span><span class="badge" id="teruCount">0</span><span class="regen" id="teruRegen"></span></button>
+      <div class="teru-chip" id="teruChip"><span id="teruIcon"></span>×<b id="teruCount">0</b><small id="teruRegen"></small></div>
     </div>
     <div class="fx rain"></div>
     <div class="fx wind"></div>
@@ -271,6 +294,8 @@
   <div id="shopList"></div>
   <button class="reset" id="reset">データをリセット</button>
 </div></div>
+
+<div class="modal" id="bucketModal"><div class="panel" id="bucketPanel"></div></div>
 
 <div class="modal" id="jpModal"><div class="panel jp-panel" id="jpPanel"></div></div>
 
@@ -320,12 +345,12 @@ const TYPES = [
 const TYPE = Object.fromEntries(TYPES.map(t => [t.id, t]));
 
 // ---------- 天気 ----------
-// grow: 塩が育つ速さ, damp: しけやすさ, evap: 砂浜の海水が乾く速さ (1秒あたり)
+// grow: 塩が育つ速さ, damp: しけやすさ
 const WEATHERS = {
-  sun:   { icon: '☀️', name: 'はれ',     grow: 1,   damp: 1,   evap: 0.008 },
-  wind:  { icon: '🌬️', name: 'はれ・風', grow: 1.5, damp: 0.6, evap: 0.014 },
-  cloud: { icon: '☁️', name: 'くもり',   grow: 0.4, damp: 1.5, evap: 0.004 },
-  rain:  { icon: '🌧️', name: 'あめ',     grow: 0,   damp: 3,   evap: 0 },
+  sun:   { icon: '☀️', name: 'はれ',     grow: 1,   damp: 1 },
+  wind:  { icon: '🌬️', name: 'はれ・風', grow: 1.5, damp: 0.6 },
+  cloud: { icon: '☁️', name: 'くもり',   grow: 0.4, damp: 1.5 },
+  rain:  { icon: '🌧️', name: 'あめ',     grow: 0,   damp: 3 },
 };
 const W_PERIOD = 40_000;
 function weatherAt(t) {
@@ -336,17 +361,24 @@ function weatherAt(t) {
 }
 
 const GROW = 40_000;          // 晴れの日に育ちきるまで (ms)
-const DAMP_AFTER = 150_000;   // 育ってから湿気るまで (ms)
-const WET_PER_SALT = 0.1;     // 塩の粒が1つ生まれるのに使う海水
+const DAMP_AFTER = 30 * 60_000; // 育ってから湿気るまで (ms)
 const USE_PER_SEC = 1;        // 家族が1秒に使う塩 (g)
 const RATE_TAU = 120_000;     // 自給率がなじむ速さ (ms)
 const MAX_OFFLINE = 3 * 3600_000;
 const SPOTS = 15;             // 砂浜で塩が生える場所の数
 
-const TERU_TIME = 60_000;     // てるてる坊主の効き目
+const TERU_TIME = 3 * 60_000; // てるてる坊主の効き目
 const TERU_BOOST = 2.5;       // てるてる晴れの加速
 const TERU_REGEN = 10 * 60_000;
 const TERU_MAX = 3;
+
+// バケツ：海水が残る時間と、塩の育つ速さ
+const HOUR = 3600_000;
+const BUCKETS = {
+  s: { icon: '🪣', name: '小さなバケツ', hours: 4,  grow: 1.2, note: '塩がはやく育つ。こまめに見に来る人むけ' },
+  m: { icon: '🛢️', name: '大きなバケツ', hours: 8,  grow: 1,   note: 'ちょうどいい。学校や仕事のあいだに' },
+  l: { icon: '🏺', name: '海水のたる',   hours: 12, grow: 0.8, note: 'ゆっくり育つ。ひと晩おいておくなら' },
+};
 
 // ---------- しおや ----------
 const UPGRADES = [
@@ -372,7 +404,7 @@ const TIPS = {
   rain:    '雨だと塩が育たない…。日本は雨が多く湿気も高いから、太陽だけで塩をつくるのが難しい国なんだ。',
   wind:    '風がふくと水がどんどん蒸発する！ 太陽と風、自然の力だけでできる天日塩は、地球にやさしい塩なんだ。',
   damp:    '塩がしけちゃった。梅雨や夏の湿気は、日本の塩づくりの大敵なんだ。',
-  dry:     '砂浜がかわいた！ 海水の水分が蒸発して、塩だけが残ったんだ。',
+  dry:     '砂浜がかわききった！ 海水の水分は蒸発して、塩だけが残ったんだ。また海水をまこう。',
   low:     '自給率が下がってきた…。塩づくりを休むと、そのぶん輸入塩にたよることになるんだ。',
   house:   '日本でも、ハウスで雨をよけながら天日塩をつくっている人たちがいるよ。',
   shijoka: '枝条架は、昔の日本の塩田で使われていた道具。風の力で海水を濃くするんだ。',
@@ -393,7 +425,8 @@ const CHAPTERS = [
       ['na', '家の裏の砂浜を歩いていると…\n白くて四角いなにかが、ちょこんと座っている。'],
       ['jii', 'おや、人間の子どもとは めずらしい。\nわしは この浜に住む塩の精、しおじいさんじゃ。'],
       ['jii', '昔はこの浜も、塩づくりで にぎわっておったんじゃがのう…。'],
-      ['jii', 'どうじゃ、塩づくりを手伝ってくれんか？\nまずは 上の海をタップして、砂浜に海水をまいてみるんじゃ！'],
+      ['jii', 'どうじゃ、塩づくりを手伝ってくれんか？\nまずは 上の海をタップして、バケツで海水をくむんじゃ。'],
+      ['jii', 'バケツが大きいほど、砂浜が長いあいだ濡れたままになる。\n濡れているあいだは、ほうっておいても塩が生まれるぞい。'],
       ['jii', 'お日さまが海水を乾かすと、塩の粒が生まれて、だんだん大きくなる。\n育ったら、タップかなぞって収穫じゃ！'],
     ] },
   { title: '第2話　塩自給生活のはじまり', goal: 'わが家の自給率を10%にしよう', prog: () => [pct(), 10], unit: '%', reward: { sp: 30 },
@@ -414,7 +447,8 @@ const CHAPTERS = [
       ['jii', '日本は雨が多くて、湿気も多い。\nお日さまだけで塩をつくるには、ちと むずかしい国なんじゃ。'],
       ['jii', 'そこで、これじゃ！'],
       ['na', '☁️ てるてる坊主を 2つ もらった！'],
-      ['jii', 'てるてる坊主をつるすと、しばらく晴れて、塩がぐんぐん育つぞい。\n右下のボタンで使えるんじゃ。'],
+      ['jii', 'てるてる坊主をつるすと、しばらく晴れて、塩がぐんぐん育つぞい。'],
+      ['jii', '海水をまくときに「つるすか？」と聞くから、つるしてみるんじゃ。\nさっそく海をタップしてみい！'],
       ['jii', '使っても、時間がたつと また作れるからの。'],
     ] },
   { title: '第4話　風の力', goal: '「しおや」で枝条架をつくろう', prog: () => [state.up.shijoka, 1], reward: { sp: 40 },
@@ -469,13 +503,13 @@ function freshState() {
     sp: 0, stock: 0, rate: 0, dex: {}, tips: {}, flags: {},
     up: { shijoka: 0, house: 0, field: 0, rare: 0 },
     lastTick: Date.now(),
-    wet: 0, spawnWait: 600, salts: [], nextId: 1, harvested: 0,
+    wetFrom: 0, wetUntil: 0, bucket: 'm', spawnWait: 600, salts: [], nextId: 1, harvested: 0,
     teru: { count: 0, until: 0, regenAt: 0 },
     chapter: 0, sceneSeen: -1,
   };
 }
 let state;
-try { state = JSON.parse(localStorage.getItem(KEY)) || freshState(); } catch { state = freshState(); }
+try { state = { ...freshState(), ...JSON.parse(localStorage.getItem(KEY)) }; } catch { state = freshState(); }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} }
 
 const capacity = () => 6 + state.up.field;
@@ -504,6 +538,7 @@ const stageOf = s => s.prog >= GROW ? 2 : s.prog >= GROW * 0.45 ? 1 : 0;
 const isDamp = s => s.prog >= GROW && s.ready >= DAMP_AFTER;
 const scaleOf = s => 0.16 + 0.84 * Math.pow(s.prog / GROW, 0.8);
 const teruActive = now => now < state.teru.until;
+const isWet = now => now < state.wetUntil;
 const weatherNow = now => teruActive(now) ? 'sun' : weatherAt(now);
 
 // 時間を進める（留守のあいだの分も、天気・てるてる坊主ごとに区切って計算）
@@ -511,26 +546,26 @@ function advance(to) {
   let t = Math.max(state.lastTick, to - MAX_OFFLINE);
   while (t < to) {
     let end = Math.min((Math.floor(t / W_PERIOD) + 1) * W_PERIOD, to);
-    const teru = teruActive(t);
+    const teru = teruActive(t), wet = isWet(t);
     if (teru) end = Math.min(end, state.teru.until);
-    step(teru ? 'sun' : weatherAt(t), end - t, teru ? TERU_BOOST : 1);
+    if (wet) end = Math.min(end, state.wetUntil);
+    step(teru ? 'sun' : weatherAt(t), end - t, teru ? TERU_BOOST : 1, wet);
     t = end;
   }
   state.lastTick = to;
 }
-function step(w, dt, boost) {
-  // 砂浜の海水から、塩の粒が生まれる
-  if (state.wet > 0 && state.salts.length < capacity()) {
+function step(w, dt, boost, wet) {
+  // 砂浜に海水があるあいだ、塩の粒が生まれる
+  if (wet && state.salts.length < capacity()) {
     state.spawnWait -= dt * boost;
-    while (state.spawnWait <= 0 && state.wet > 0 && state.salts.length < capacity()) {
+    while (state.spawnWait <= 0 && state.salts.length < capacity()) {
       spawnSalt();
-      state.wet = Math.max(0, state.wet - WET_PER_SALT);
       state.spawnWait += 1200 + Math.random() * 2500;
     }
   }
-  state.wet = Math.max(0, state.wet - dt / 1000 * WEATHERS[w].evap * boost);
+  const speed = boost * BUCKETS[state.bucket].grow;
   for (const s of state.salts) {
-    if (s.prog < GROW) s.prog = Math.min(GROW, s.prog + dt * growRate(w) * boost);
+    if (s.prog < GROW) s.prog = Math.min(GROW, s.prog + dt * growRate(w) * speed);
     else s.ready += dt * dampRate(w);
   }
   // 家族が塩を使う。手づくりのストックがなければ輸入塩を使う
@@ -639,11 +674,15 @@ function tick() {
   }
 
   // 砂浜
-  $('wet').style.opacity = (state.wet * 0.65).toFixed(2);
-  $('wetFill').style.width = state.wet * 100 + '%';
-  if (state.wet > 0.05) wasWet = true;
-  else if (wasWet && state.salts.length) { wasWet = false; showTip('dry'); }
-  $('splashHint').classList.toggle('show', state.wet < 0.05 && state.salts.length < capacity() && !scene);
+  const wet = isWet(now), left = state.wetUntil - now;
+  const frac = wet ? left / (state.wetUntil - state.wetFrom) : 0;
+  // 残りわずかになると、だんだん乾いていく
+  $('wet').style.opacity = wet ? (0.35 + 0.5 * Math.min(1, frac * 4)).toFixed(2) : 0;
+  $('wetFill').style.width = frac * 100 + '%';
+  $('wetText').textContent = wet ? `のこり ${fmtTime(left)}` : 'からから';
+  if (wet) wasWet = true;
+  else if (wasWet) { wasWet = false; showTip('dry'); }
+  $('splashHint').classList.toggle('show', !wet && !scene);
   renderSalts();
 
   renderHud(now);
@@ -654,11 +693,48 @@ function tick() {
 }
 
 // ---------- 海水をまく ----------
-function splash() {
+function fmtTime(ms) {
+  const sec = Math.max(0, Math.ceil(ms / 1000)), h = Math.floor(sec / 3600), m = Math.floor(sec / 60) % 60, ss = sec % 60;
+  return h ? `${h}:${String(m).padStart(2, '0')}:${String(ss).padStart(2, '0')}` : `${m}:${String(ss).padStart(2, '0')}`;
+}
+function askBucket() {
   if (scene) return;
-  if (state.wet > 0.9) { floatText(innerWidth / 2, $('beach').getBoundingClientRect().top + 60, 'もう びしょびしょ！'); return; }
-  state.wet = 1;
+  const now = Date.now();
+  $('bucketPanel').innerHTML = `<button class="close" data-close>×</button>
+    <h2>🌊 海水をくむ</h2>
+    ${isWet(now) ? `<div class="bucket-note">まだ海水が残っているよ（のこり ${fmtTime(state.wetUntil - now)}）。<br>まき直すと、えらんだバケツの時間からやり直しになるよ。</div>` : ''}
+    <div class="bucket-opts">${Object.entries(BUCKETS).map(([k, b]) => `
+      <button class="bucket-opt" data-bucket="${k}"><span class="ico">${b.icon}</span>
+        <span><b>${b.name}</b>　${b.hours}時間<small>${b.note}</small></span></button>`).join('')}
+    </div>`;
+  $('bucketPanel').querySelectorAll('[data-bucket]').forEach(b => b.onclick = () => askTeru(b.dataset.bucket));
+  openModal('bucketModal');
+}
+function askTeru(bucket) {
+  const t = state.teru;
+  if (state.chapter < 2 || t.count <= 0) { $('bucketModal').classList.remove('open'); return splash(bucket, false); }
+  $('bucketPanel').innerHTML = `<div class="teru-ask">
+    <div class="big">${TERU_SVG}</div>
+    <h2>てるてる坊主をつるす？</h2>
+    <p>${TERU_TIME / 60000}分間 晴れになって、塩が ${TERU_BOOST}倍の速さで育つよ。<br><small>のこり ${t.count}こ</small></p>
+    <div class="row"><button class="btn" id="teruNo">つるさない</button><button class="btn yes" id="teruYes">つるす！</button></div></div>`;
+  $('teruNo').onclick = () => { $('bucketModal').classList.remove('open'); splash(bucket, false); };
+  $('teruYes').onclick = () => { $('bucketModal').classList.remove('open'); splash(bucket, true); };
+}
+function splash(bucket, useTeru) {
+  const now = Date.now();
+  advance(now);
+  state.bucket = bucket;
+  state.wetFrom = now;
+  state.wetUntil = now + BUCKETS[bucket].hours * HOUR;
   if (state.spawnWait > 800) state.spawnWait = 400;
+  if (useTeru && state.teru.count > 0) {
+    state.teru.count--;
+    state.teru.until = Math.max(now, state.teru.until) + TERU_TIME;
+    state.flags.teru = true;
+    lastWeather = null;
+    setTimeout(() => sound(660, 990, 0.3), 500);
+  }
   const beach = $('beach');
   const sheet = document.createElement('div');
   sheet.className = 'wave-sheet';
@@ -675,10 +751,14 @@ function splash() {
     beach.appendChild(d);
     setTimeout(() => d.remove(), 1100);
   }
+  if (useTeru) {
+    const r = $('sea').getBoundingClientRect();
+    floatText(r.left + r.width / 2, r.bottom, 'あーした天気になーれ！', true);
+  }
   sound(300, 120, 0.35, 'triangle');
   tick();
 }
-$('sea').addEventListener('pointerdown', splash);
+$('sea').addEventListener('pointerdown', askBucket);
 
 // ---------- てるてる坊主 ----------
 function regenTeru(now) {
@@ -688,18 +768,6 @@ function regenTeru(now) {
   while (now >= t.regenAt && t.count < TERU_MAX) { t.count++; t.regenAt += TERU_REGEN; }
   if (t.count >= TERU_MAX) t.regenAt = 0;
 }
-$('teruBtn').addEventListener('pointerdown', e => {
-  e.stopPropagation();
-  const t = state.teru, now = Date.now();
-  if (t.count <= 0) { floatText(e.clientX, e.clientY - 30, 'てるてる坊主がない…'); return; }
-  t.count--;
-  t.until = Math.max(now, t.until) + TERU_TIME;
-  state.flags.teru = true;
-  floatText(e.clientX, e.clientY - 40, 'あーした天気になーれ！', true);
-  sound(660, 990, 0.3);
-  lastWeather = null;
-  tick();
-});
 
 // ---------- 収穫 ----------
 let audio;
@@ -883,14 +951,10 @@ function renderHud(now) {
     $('goalNum').textContent = ''; $('goalFill').style.width = '100%';
   }
 
-  const t = state.teru, btn = $('teruBtn');
-  btn.classList.toggle('show', state.chapter >= 2);
+  const t = state.teru;
+  $('teruChip').classList.toggle('show', state.chapter >= 2);
   $('teruCount').textContent = t.count;
-  btn.disabled = t.count <= 0;
-  if (t.regenAt) {
-    const left = Math.max(0, t.regenAt - now), m = Math.floor(left / 60000), s = Math.floor(left / 1000) % 60;
-    $('teruRegen').textContent = `つぎ ${m}:${String(s).padStart(2, '0')}`;
-  } else $('teruRegen').textContent = '';
+  $('teruRegen').textContent = t.regenAt ? `つぎ ${fmtTime(t.regenAt - now)}` : '';
 }
 
 function openModal(id) {
