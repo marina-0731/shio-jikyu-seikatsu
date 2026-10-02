@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>しお栽培キット</title>
+<title>塩自給生活</title>
 <style>
   :root {
     --sea: #7cc4e4;
@@ -14,6 +14,8 @@
     --ink: #4a3b2a;
     --accent: #e8735a;
     --card: #fffaf0;
+    --self: #f0a830;
+    --import: #9bb3c4;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; height: 100%; }
@@ -25,17 +27,28 @@
     user-select: none; -webkit-user-select: none;
     overflow: hidden;
   }
-  #app { width: 100%; max-width: 520px; height: 100%; display: flex; flex-direction: column; padding: 12px 16px 16px; gap: 12px; }
+  #app { width: 100%; max-width: 520px; height: 100%; display: flex; flex-direction: column; padding: 12px 16px 16px; gap: 10px; position: relative; }
 
   header { display: flex; align-items: center; justify-content: space-between; }
   h1 { font-size: 22px; margin: 0; letter-spacing: .05em; }
-  h1 small { display: block; font-size: 11px; font-weight: normal; opacity: .6; letter-spacing: .1em; }
+  h1 small { display: block; font-size: 10px; font-weight: normal; opacity: .6; letter-spacing: .1em; }
   .sp { background: var(--card); border-radius: 999px; padding: 6px 14px; font-weight: bold; box-shadow: 0 2px 0 #0001; }
   .sp b { font-size: 20px; color: var(--accent); }
 
+  /* 自給率メーター */
+  .meter { background: var(--card); border-radius: 14px; padding: 8px 12px 10px; box-shadow: 0 2px 0 #0001; }
+  .meter-top { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; }
+  .meter-top b { font-size: 22px; color: var(--self); }
+  .bar { position: relative; height: 14px; background: var(--import); border-radius: 999px; margin-top: 4px; overflow: visible; }
+  .bar .fill { position: absolute; inset: 0 auto 0 0; background: var(--self); border-radius: 999px; transition: width .6s; }
+  .bar .jp { position: absolute; left: 10%; top: -3px; bottom: -3px; width: 2px; background: var(--ink); }
+  .bar .jp::after { content: "日本 約10%"; position: absolute; top: 18px; left: -18px; font-size: 9px; white-space: nowrap; opacity: .7; }
+  .meter-legend { display: flex; justify-content: flex-end; gap: 10px; font-size: 10px; margin-top: 4px; opacity: .75; }
+  .meter-legend i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 3px; vertical-align: 0; }
+
   /* 海と塩田 */
-  #stage { flex: 1; display: flex; flex-direction: column; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 0 #0000001a; min-height: 0; }
-  .sea { height: 56px; background: linear-gradient(var(--sea), var(--sea-deep)); position: relative; overflow: hidden; flex-shrink: 0; }
+  #stage { flex: 1; display: flex; flex-direction: column; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 0 #0000001a; min-height: 0; position: relative; }
+  .sea { height: 56px; background: linear-gradient(var(--sea), var(--sea-deep)); position: relative; overflow: hidden; flex-shrink: 0; transition: filter 1s; }
   .sea::before, .sea::after {
     content: ""; position: absolute; left: -50%; width: 200%; height: 20px; bottom: -6px;
     background: radial-gradient(circle at 10px -4px, transparent 12px, var(--pan) 13px) 0 0 / 26px 20px repeat-x;
@@ -43,13 +56,27 @@
   }
   .sea::after { bottom: 8px; opacity: .25; animation-duration: 9s; animation-direction: reverse; }
   @keyframes wave { to { transform: translateX(26px); } }
-  .sun { position: absolute; right: 18px; top: 8px; width: 30px; height: 30px; border-radius: 50%; background: #ffd65a; box-shadow: 0 0 0 6px #ffd65a55; }
+  .weather { position: absolute; left: 10px; top: 6px; z-index: 2; background: #ffffffd0; border-radius: 999px; padding: 3px 10px; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 6px; }
+  .weather .next { font-weight: normal; font-size: 11px; opacity: .7; }
+  .weather .timer { width: 36px; height: 4px; background: #0002; border-radius: 2px; overflow: hidden; }
+  .weather .timer i { display: block; height: 100%; background: var(--ink); opacity: .5; }
+  .sky-icon { position: absolute; right: 14px; top: 4px; font-size: 30px; line-height: 1; z-index: 2; }
 
   #board {
     flex: 1; background: var(--pan); padding: 12px;
     display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(3, 1fr); gap: 8px;
-    touch-action: none; min-height: 0;
+    touch-action: none; min-height: 0; transition: filter 1s;
   }
+  .fx { position: absolute; inset: 56px 0 0; pointer-events: none; opacity: 0; transition: opacity 1s; }
+  .w-rain .fx.rain { opacity: 1; }
+  .fx.rain { background: repeating-linear-gradient(105deg, transparent 0 14px, #5a8fb055 14px 15px) 0 0 / 60px 60px; animation: rain .35s linear infinite; }
+  @keyframes rain { to { background-position: -16px 60px; } }
+  .w-wind .fx.wind { opacity: 1; }
+  .fx.wind { background: repeating-linear-gradient(0deg, transparent 0 46px, #ffffff99 46px 48px) 0 0 / 140px 100%; mask: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent) 0 0 / 140px 100%; -webkit-mask: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent) 0 0 / 140px 100%; animation: wind 1.2s linear infinite; }
+  @keyframes wind { to { background-position: 140px 0; -webkit-mask-position: 140px 0; mask-position: 140px 0; } }
+  .w-rain #board, .w-rain .sea { filter: brightness(.82) saturate(.7); }
+  .w-cloud #board, .w-cloud .sea { filter: brightness(.93) saturate(.85); }
+
   .cell {
     background: var(--cell); border-radius: 12px; border: 2px solid var(--pan-line);
     position: relative; display: flex; align-items: flex-end; justify-content: center;
@@ -57,7 +84,7 @@
   }
   .cell.locked { background: #d8c9a6; border-style: dashed; opacity: .55; align-items: center; font-size: 18px; }
   .cell .water { position: absolute; inset: 30% 10% 8%; border-radius: 50%; background: #a9d8ec55; }
-  .shio { width: 88%; aspect-ratio: 1; position: relative; transform-origin: 50% 90%; transition: transform .4s cubic-bezier(.3,1.6,.5,1); pointer-events: none; }
+  .shio { width: 88%; max-width: 90px; aspect-ratio: 1; position: relative; transform-origin: 50% 90%; transition: transform .4s cubic-bezier(.3,1.6,.5,1); pointer-events: none; }
   .shio svg { width: 100%; height: 100%; display: block; overflow: visible; }
   .s0 { transform: scale(.35); }
   .s1 { transform: scale(.65); }
@@ -68,15 +95,24 @@
 
   .fly { position: fixed; pointer-events: none; z-index: 50; animation: fly .7s ease-in forwards; }
   @keyframes fly { to { transform: translateY(-120px) scale(.4) rotate(20deg); opacity: 0; } }
-  .plus { position: fixed; pointer-events: none; z-index: 51; font-weight: bold; color: var(--accent); font-size: 20px; text-shadow: 0 2px 0 #fff; animation: plus .9s ease-out forwards; }
+  .plus { position: fixed; pointer-events: none; z-index: 51; font-weight: bold; color: var(--accent); font-size: 18px; text-shadow: 0 2px 0 #fff; animation: plus .9s ease-out forwards; white-space: nowrap; }
   @keyframes plus { to { transform: translateY(-50px); opacity: 0; } }
 
-  .hint { text-align: center; font-size: 12px; opacity: .6; margin: -4px 0 0; }
+  /* まめ知識の吹き出し */
+  .tip {
+    position: absolute; left: 16px; right: 16px; bottom: 72px; z-index: 60;
+    background: #fff; border-radius: 16px; padding: 10px 12px; display: flex; gap: 10px; align-items: center;
+    box-shadow: 0 6px 20px #0003; font-size: 13px; line-height: 1.6; cursor: pointer;
+    transform: translateY(20px); opacity: 0; pointer-events: none; transition: .3s;
+  }
+  .tip.show { transform: none; opacity: 1; pointer-events: auto; }
+  .tip .shio { width: 52px; flex: none; }
+  .tip small { display: block; color: var(--accent); font-weight: bold; font-size: 11px; }
 
-  nav { display: flex; gap: 10px; }
+  nav { display: flex; gap: 8px; }
   nav button, .btn {
-    flex: 1; font: inherit; font-weight: bold; font-size: 16px; color: var(--ink);
-    background: var(--card); border: none; border-radius: 14px; padding: 12px; cursor: pointer;
+    flex: 1; font: inherit; font-weight: bold; font-size: 14px; color: var(--ink);
+    background: var(--card); border: none; border-radius: 14px; padding: 12px 6px; cursor: pointer;
     box-shadow: 0 4px 0 #0000001f; transition: transform .1s;
   }
   nav button:active, .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #0000001f; }
@@ -95,9 +131,10 @@
   .dex .card.unknown .shio { filter: brightness(0); opacity: .18; }
   .stars { color: #f0b400; font-size: 10px; letter-spacing: -1px; }
   .detail { margin-top: 12px; background: #fff; border-radius: 12px; padding: 12px; font-size: 13px; line-height: 1.6; min-height: 60px; }
+  .detail .mame { display: block; margin-top: 6px; padding-top: 6px; border-top: 1px dashed #ddd; }
 
   .shop-item { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; }
-  .shop-item .info { flex: 1; font-size: 13px; }
+  .shop-item .info { flex: 1; font-size: 12px; line-height: 1.5; }
   .shop-item .info b { font-size: 15px; }
   .shop-item button { flex: none; font-size: 13px; padding: 8px 12px; background: var(--accent); color: #fff; }
   .shop-item button:disabled { background: #ccc; box-shadow: none; }
@@ -108,25 +145,54 @@
   .newcard .shio { width: 140px; margin: 10px auto; }
   .newcard h3 { margin: 4px 0; font-size: 22px; }
   .newcard p { font-size: 14px; line-height: 1.6; }
+
+  /* 日本の塩 */
+  .jp-panel p { font-size: 14px; line-height: 1.7; margin: 8px 0; }
+  .jp-panel h3 { font-size: 15px; margin: 18px 0 6px; }
+  .stack { display: flex; height: 34px; border-radius: 10px; overflow: hidden; background: #eee; }
+  .stack div { width: 0; transition: width 1.2s cubic-bezier(.2,.8,.2,1); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: bold; white-space: nowrap; overflow: hidden; }
+  .legend { font-size: 12px; line-height: 1.8; margin-top: 6px; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; }
+  .callout { background: #fff4d6; border-radius: 12px; padding: 12px; font-size: 14px; line-height: 1.7; margin-top: 14px; }
+  .mame-list { font-size: 12px; line-height: 1.7; padding-left: 18px; margin: 6px 0 0; }
+  .mame-list li { margin-bottom: 4px; }
+  .source { font-size: 10px; opacity: .6; margin-top: 14px; line-height: 1.6; }
 </style>
 </head>
 <body>
 <div id="app">
   <header>
-    <h1>しお栽培キット<small>SALT GROWING KIT</small></h1>
+    <h1>塩自給生活<small>SALT SELF-SUFFICIENCY LIFE</small></h1>
     <div class="sp"><b id="sp">0</b> SP</div>
   </header>
 
-  <div id="stage">
-    <div class="sea"><div class="sun"></div></div>
-    <div id="board"></div>
+  <div class="meter">
+    <div class="meter-top"><span>🏠 わが家の塩の自給率</span><span><b id="rate">0</b>%</span></div>
+    <div class="bar"><div class="fill" id="rateFill"></div><div class="jp"></div></div>
+    <div class="meter-legend">
+      <span>ストック <b id="stock">0</b>g</span>
+      <span><i style="background:var(--self)"></i>手づくり</span>
+      <span><i style="background:var(--import)"></i>輸入塩</span>
+    </div>
   </div>
-  <p class="hint">育った塩を タップ / なぞって 収穫しよう</p>
+
+  <div id="stage">
+    <div class="sea">
+      <div class="weather"><span id="wNow">☀️ はれ</span><span class="timer"><i id="wTimer"></i></span><span class="next" id="wNext"></span></div>
+      <div class="sky-icon" id="sky">☀️</div>
+    </div>
+    <div id="board"></div>
+    <div class="fx rain"></div>
+    <div class="fx wind"></div>
+  </div>
 
   <nav>
     <button id="openDex">📖 ずかん <span id="dexCount"></span></button>
     <button id="openShop">🛠 しおや</button>
+    <button id="openJp">🗾 日本の塩</button>
   </nav>
+
+  <div class="tip" id="tip"></div>
 </div>
 
 <div class="modal" id="dexModal"><div class="panel">
@@ -138,75 +204,131 @@
 
 <div class="modal" id="shopModal"><div class="panel">
   <button class="close" data-close>×</button>
-  <h2>しおや（強化）</h2>
+  <h2>しおや（天日塩の道具）</h2>
   <div id="shopList"></div>
   <button class="reset" id="reset">データをリセット</button>
 </div></div>
+
+<div class="modal" id="jpModal"><div class="panel jp-panel" id="jpPanel"></div></div>
 
 <div class="modal" id="newModal"><div class="panel newcard" id="newCard"></div></div>
 
 <script>
 // ---------- 塩の種類 ----------
-// colors: [上面, 左面, 右面], w: 出現の重み, sp: 収穫ポイント
+// colors: [上面, 左面, 右面], w: 出現の重み, sp: しおや で使うポイント, g: 家のストックに入る量
 const TYPES = [
-  { id: 'futsu',  name: 'ふつうのしお',   w: 50,  sp: 1,   rank: 1, colors: ['#ffffff', '#eef2f5', '#d9e1e8'], face: 'normal',
-    desc: 'どこにでもいる塩。おにぎりにかけられるのが夢。' },
-  { id: 'ara',    name: 'あらじお',       w: 25,  sp: 2,   rank: 1, colors: ['#fbf8f0', '#ece5d4', '#d8cfb8'], face: 'normal', grains: true,
-    desc: 'ちょっと粒が大きめ。ステーキの上が定位置だと思っている。' },
-  { id: 'pink',   name: 'ピンク岩塩',     w: 9,   sp: 5,   rank: 2, colors: ['#ffd9df', '#f6b6c2', '#e696a6'], face: 'happy',
-    desc: 'ヒマラヤ出身と言い張っているが、ここ生まれ。' },
-  { id: 'mo',     name: '藻塩',           w: 8,   sp: 5,   rank: 2, colors: ['#efe0c4', '#dcc59c', '#c2a878'], face: 'normal', grains: true,
-    desc: '海藻のうまみをまとった塩。ちょっと磯くさいのが自慢。' },
-  { id: 'yuki',   name: '雪塩',           w: 6,   sp: 8,   rank: 3, colors: ['#ffffff', '#f4fbff', '#e2f1fb'], face: 'happy', snow: true,
-    desc: 'パウダーみたいにふわふわ。強くなでると消える。' },
-  { id: 'herb',   name: 'ハーブソルト',   w: 4,   sp: 10,  rank: 3, colors: ['#eef5e2', '#d3e6b8', '#b4cf92'], face: 'happy', grains: '#6a9a3a',
-    desc: 'おしゃれ好き。サラダの上でしか本気を出さない。' },
-  { id: 'take',   name: '竹塩',           w: 3,   sp: 12,  rank: 3, colors: ['#e2dbe8', '#c6b8d4', '#a796bb'], face: 'normal',
-    desc: '竹の筒で何度も焼かれた、修行を積んだ塩。' },
-  { id: 'kuro',   name: '黒い溶岩塩',     w: 2.5, sp: 15,  rank: 4, colors: ['#5a5560', '#403b46', '#2c2832'], face: 'cool',
-    desc: '見た目はこわいけど、ゆで卵にかけると優しい味。' },
-  { id: 'jii',    name: 'しおじいさん',   w: 1.5, sp: 30,  rank: 4, colors: ['#f6f3ec', '#e4ddcf', '#cfc5b2'], face: 'old',
-    desc: '塩田に何十年もいる長老。「わしの若いころは海じゃった」' },
-  { id: 'sato',   name: 'さとう',         w: 2,   sp: 0,   rank: 3, colors: ['#ffffff', '#f2f0ff', '#dcdaf0'], face: 'sweat',
-    desc: 'なぜか紛れこんでいた砂糖。本人は塩のつもり。ポイントにならない。' },
-  { id: 'gold',   name: '金の塩',         w: 0.4, sp: 100, rank: 5, colors: ['#ffe98a', '#f5c842', '#d9a51c'], face: 'happy', shine: true,
-    desc: '伝説の塩。見つけた人には一生しょっぱい幸運が訪れる。' },
-  { id: 'damp',   name: 'しけった塩',     w: 0,   sp: 1,   rank: 2, colors: ['#e3edf2', '#c8d8e2', '#a9bfcc'], face: 'droopy',
-    desc: '放っておかれて湿気てしまった塩。早く収穫してあげよう。' },
+  { id: 'futsu', name: 'ふつうのしお', w: 50, sp: 1, g: 10, rank: 1, colors: ['#ffffff', '#eef2f5', '#d9e1e8'], face: 'normal',
+    desc: 'どこにでもいる塩。おにぎりにかけられるのが夢。',
+    mame: '日本人は1日に約10gの食塩をとっているよ。' },
+  { id: 'ara', name: 'あらじお', w: 25, sp: 2, g: 10, rank: 1, colors: ['#fbf8f0', '#ece5d4', '#d8cfb8'], face: 'normal', grains: true,
+    desc: 'ちょっと粒が大きめ。ステーキの上が定位置だと思っている。',
+    mame: '天日塩は太陽と風でゆっくり結晶になるから、粒が大きく育ちやすいんだ。' },
+  { id: 'pink', name: 'ピンク岩塩', w: 9, sp: 5, g: 12, rank: 2, colors: ['#ffd9df', '#f6b6c2', '#e696a6'], face: 'happy',
+    desc: 'ヒマラヤ出身と言い張っているが、ここ生まれ。',
+    mame: '岩塩は、大昔の海が干上がって、地面の下に閉じこめられた塩だよ。' },
+  { id: 'mo', name: '藻塩', w: 8, sp: 5, g: 12, rank: 2, colors: ['#efe0c4', '#dcc59c', '#c2a878'], face: 'normal', grains: true,
+    desc: '海藻のうまみをまとった塩。ちょっと磯くさいのが自慢。',
+    mame: '海藻に海水をかけては干す。藻塩は、日本でとても古くから続く塩づくりの方法なんだ。' },
+  { id: 'yuki', name: '雪塩', w: 6, sp: 8, g: 10, rank: 3, colors: ['#ffffff', '#f4fbff', '#e2f1fb'], face: 'happy', snow: true,
+    desc: 'パウダーみたいにふわふわ。強くなでると消える。',
+    mame: '日本各地の海辺には、その土地ならではの塩づくりが今も残っているよ。' },
+  { id: 'herb', name: 'ハーブソルト', w: 4, sp: 10, g: 10, rank: 3, colors: ['#eef5e2', '#d3e6b8', '#b4cf92'], face: 'happy', grains: '#6a9a3a',
+    desc: 'おしゃれ好き。サラダの上でしか本気を出さない。',
+    mame: '塩は大昔から、食べ物をくさらせないための保存料として使われてきたんだ。' },
+  { id: 'take', name: '竹塩', w: 3, sp: 12, g: 12, rank: 3, colors: ['#e2dbe8', '#c6b8d4', '#a796bb'], face: 'normal',
+    desc: '竹の筒で何度も焼かれた、修行を積んだ塩。',
+    mame: '竹塩は韓国の伝統的な塩。竹の筒に塩をつめて、何度も焼いてつくるよ。' },
+  { id: 'kuro', name: '黒い溶岩塩', w: 2.5, sp: 15, g: 12, rank: 4, colors: ['#5a5560', '#403b46', '#2c2832'], face: 'cool',
+    desc: '見た目はこわいけど、ゆで卵にかけると優しい味。',
+    mame: 'ハワイの黒い塩は、塩に炭をまぜて黒くしているんだって。' },
+  { id: 'jii', name: 'しおじいさん', w: 1.5, sp: 30, g: 20, rank: 4, colors: ['#f6f3ec', '#e4ddcf', '#cfc5b2'], face: 'old',
+    desc: '塩田に何十年もいる長老。「わしの若いころは、海辺は塩田だらけじゃった」',
+    mame: '昔の日本の海辺にはたくさんの塩田があったけど、1970年代はじめにほとんどが姿を消したんだ。' },
+  { id: 'sato', name: 'さとう', w: 2, sp: 0, g: 0, rank: 3, colors: ['#ffffff', '#f2f0ff', '#dcdaf0'], face: 'sweat',
+    desc: 'なぜか紛れこんでいた砂糖。本人は塩のつもり。ポイントにならない。',
+    mame: 'さとうはサトウキビなどの植物から、塩は海や大地からとれるよ。' },
+  { id: 'gold', name: '金の塩', w: 0.4, sp: 100, g: 30, rank: 5, colors: ['#ffe98a', '#f5c842', '#d9a51c'], face: 'happy', shine: true,
+    desc: '伝説の塩。見つけた人には一生しょっぱい幸運が訪れる。',
+    mame: '昔、塩はとても貴重だった。英語の「サラリー（給料）」は、塩に関係する言葉から来たという説があるよ。' },
+  { id: 'damp', name: 'しけった塩', w: 0, sp: 1, g: 4, rank: 2, colors: ['#e3edf2', '#c8d8e2', '#a9bfcc'], face: 'droopy',
+    desc: '放っておかれて湿気てしまった塩。早く収穫してあげよう。',
+    mame: '塩は空気中の水分を吸いやすい。湿気の多い日本では、天日干しの途中で塩がしけやすいんだ。' },
 ];
 const TYPE = Object.fromEntries(TYPES.map(t => [t.id, t]));
 
-const BASE_GROW = 40_000;     // 成長にかかる時間 (ms)
-const DAMP_AFTER = 180_000;   // 育ってから湿気るまで (ms)
+// ---------- 天気 ----------
+// grow: 成長の速さ, damp: しけやすさ
+const WEATHERS = {
+  sun:   { icon: '☀️', name: 'はれ',     grow: 1,   damp: 1 },
+  wind:  { icon: '🌬️', name: 'はれ・風', grow: 1.5, damp: 0.6 },
+  cloud: { icon: '☁️', name: 'くもり',   grow: 0.4, damp: 1.5 },
+  rain:  { icon: '🌧️', name: 'あめ',     grow: 0,   damp: 3 },
+};
+const W_PERIOD = 40_000;
+function weatherAt(t) {
+  const n = Math.floor(t / W_PERIOD);
+  const x = Math.sin(n * 12.9898 + 78.233) * 43758.5453;
+  const r = x - Math.floor(x);
+  return r < 0.35 ? 'sun' : r < 0.55 ? 'wind' : r < 0.75 ? 'cloud' : 'rain';
+}
+
+const GROW = 40_000;          // 晴れの日に育ちきるまで (ms)
+const DAMP_AFTER = 150_000;   // 育ってから湿気るまで (ms)
+const USE_PER_SEC = 1;        // 家族が1秒に使う塩 (g)
+const RATE_TAU = 120_000;     // 自給率がなじむ速さ (ms)
+const MAX_OFFLINE = 3 * 3600_000;
 const MAX_SLOTS = 15;
 
-// ---------- 強化 ----------
+// ---------- しおや ----------
 const UPGRADES = [
-  { id: 'sun',   name: '☀️ 太陽のちから', desc: '塩が育つスピードが上がる', max: 5,
-    cost: lv => 30 * 2 ** lv },
-  { id: 'field', name: '🧱 塩田をひろげる', desc: '塩が育つ場所が1マス増える', max: 9,
-    cost: lv => Math.round(40 * (lv + 1) ** 1.6) },
-  { id: 'rare',  name: '🌊 海水のめぐみ', desc: 'めずらしい塩が出やすくなる', max: 5,
-    cost: lv => 80 * 2 ** lv },
+  { id: 'shijoka', name: '🎋 枝条架（しじょうか）', max: 5, cost: lv => 30 * 2 ** lv,
+    desc: '竹の枝に海水をしたたらせて、風で水を飛ばす昔の装置。風の日にぐんぐん育つ。' },
+  { id: 'house', name: '🏠 結晶ハウス', max: 3, cost: lv => 120 * 3 ** lv,
+    desc: '雨をよけて天日干しできるハウス。雨の日も少し育ち、しけにくくなる。' },
+  { id: 'field', name: '🧱 塩田をひろげる', max: 9, cost: lv => Math.round(40 * (lv + 1) ** 1.6),
+    desc: '塩が育つ場所が1マス増える。' },
+  { id: 'rare', name: '🌊 きれいな海', max: 5, cost: lv => 80 * 2 ** lv,
+    desc: '海がきれいだと、めずらしい塩が育ちやすくなる。' },
 ];
 
+function growRate(w) {
+  const { shijoka, house } = state.up;
+  if (w === 'rain') return 0.15 * house;
+  return WEATHERS[w].grow + (w === 'wind' ? 0.3 * shijoka : 0.05 * shijoka);
+}
+const dampRate = w => w === 'rain' ? 3 - 0.8 * state.up.house : WEATHERS[w].damp;
+
+// ---------- まめ知識（できごとで出てくる） ----------
+const TIPS = {
+  first:   '海水を太陽にあてると、水だけが蒸発して塩が残る。これが「天日塩（てんぴえん）」。燃料も電気もいらない塩づくりなんだ。',
+  rain:    '雨だと塩が育たない…。日本は雨が多く湿気も高いから、太陽だけで塩をつくるのが難しい国なんだ。',
+  wind:    '風がふくと水がどんどん蒸発する！ 太陽と風、自然の力だけでできる天日塩は、地球にやさしい塩なんだ。',
+  damp:    '塩がしけちゃった。梅雨や夏の湿気は、日本の塩づくりの大敵なんだ。',
+  over10:  '自給率10%をこえた！ じつは日本の塩の自給率は約10%。使う塩の約9割は外国から来ているよ。',
+  half:    '自給率50%！ 足りない分は輸入塩でおぎなっているよ。日本に来る輸入塩の多くは、メキシコやオーストラリアの天日塩なんだ。',
+  full:    'わが家の塩は自給率100%！',
+  low:     '自給率が下がってきた…。塩づくりを休むと、そのぶん輸入塩にたよることになるんだ。',
+  house:   '日本でも、ハウスで雨をよけながら天日塩をつくっている人たちがいるよ。',
+  shijoka: '枝条架は、昔の日本の塩田で使われていた道具。風の力で海水を濃くするんだ。',
+};
+
 // ---------- 状態 ----------
-const KEY = 'shio-saibai-v1';
+const KEY = 'shio-jikyu-v1';
 function freshState() {
   const now = Date.now();
   return {
-    sp: 0, dex: {},
-    up: { sun: 0, field: 0, rare: 0 },
-    slots: Array.from({ length: MAX_SLOTS }, (_, i) => ({ type: null, born: 0, spawnAt: now + 800 + i * 400 })),
+    sp: 0, stock: 0, rate: 0, dex: {}, tips: {},
+    up: { shijoka: 0, house: 0, field: 0, rare: 0 },
+    lastTick: now,
+    slots: Array.from({ length: MAX_SLOTS }, (_, i) => ({ type: null, prog: 0, ready: 0, wait: 800 + i * 400 })),
   };
 }
 let state;
 try { state = JSON.parse(localStorage.getItem(KEY)) || freshState(); } catch { state = freshState(); }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} }
 
-const growTime = () => BASE_GROW * 0.78 ** state.up.sun;
 const unlocked = () => 6 + state.up.field;
-const spawnDelay = () => (3000 + Math.random() * 7000) * 0.85 ** state.up.sun;
+const spawnDelay = () => 3000 + Math.random() * 7000;
 
 function pickType() {
   const boost = 1 + 0.5 * state.up.rare;
@@ -216,12 +338,36 @@ function pickType() {
   return 'futsu';
 }
 
-// 0: 芽, 1: 子ども, 2: 収穫どき
-function stageOf(s, now) {
-  const age = now - s.born, g = growTime();
-  return age >= g ? 2 : age >= g / 2 ? 1 : 0;
+const stageOf = s => s.prog >= GROW ? 2 : s.prog >= GROW / 2 ? 1 : 0;
+const isDamp = s => s.prog >= GROW && s.ready >= DAMP_AFTER;
+
+// 時間を進める（留守のあいだの分も、天気ごとに区切って計算）
+function advance(to) {
+  let t = Math.max(state.lastTick, to - MAX_OFFLINE);
+  while (t < to) {
+    const end = Math.min((Math.floor(t / W_PERIOD) + 1) * W_PERIOD, to);
+    step(weatherAt(t), end - t);
+    t = end;
+  }
+  state.lastTick = to;
 }
-const isDamp = (s, now) => now - s.born >= growTime() + DAMP_AFTER;
+function step(w, dt) {
+  state.slots.forEach((s, i) => {
+    if (i >= unlocked()) return;
+    if (!s.type) {
+      if ((s.wait -= dt) <= 0) { s.type = pickType(); s.prog = 0; s.ready = 0; }
+    } else if (s.prog < GROW) {
+      s.prog = Math.min(GROW, s.prog + dt * growRate(w));
+    } else {
+      s.ready += dt * dampRate(w);
+    }
+  });
+  // 家族が塩を使う。手づくりのストックがなければ輸入塩を使う
+  const need = USE_PER_SEC * dt / 1000;
+  const own = Math.min(state.stock, need);
+  state.stock -= own;
+  state.rate += (own / need - state.rate) * (1 - Math.exp(-dt / RATE_TAU));
+}
 
 // ---------- 塩のキャラ (等角の立方体 + 顔) ----------
 function shioSVG(id, stage = 2, damp = false) {
@@ -254,8 +400,7 @@ function shioSVG(id, stage = 2, damp = false) {
     default: face = eyes + mouth + blush;
   }
 
-  const shadow = `<ellipse cx="50" cy="95" rx="${30}" ry="4" fill="#00000018"/>`;
-  return `<svg viewBox="0 0 100 100">${shadow}
+  return `<svg viewBox="0 0 100 100"><ellipse cx="50" cy="95" rx="30" ry="4" fill="#00000018"/>
     <polygon points="50,10 88,30 50,52 12,30" fill="${top}" stroke="${line}" stroke-width="2" stroke-linejoin="round"/>
     <polygon points="12,30 50,52 50,92 12,72" fill="${left}" stroke="${line}" stroke-width="2" stroke-linejoin="round"/>
     <polygon points="88,30 88,72 50,92 50,52" fill="${right}" stroke="${line}" stroke-width="2" stroke-linejoin="round"/>
@@ -264,7 +409,8 @@ function shioSVG(id, stage = 2, damp = false) {
 }
 
 // ---------- 盤面 ----------
-const board = document.getElementById('board');
+const $ = id => document.getElementById(id);
+const board = $('board');
 const cells = Array.from({ length: MAX_SLOTS }, (_, i) => {
   const el = document.createElement('div');
   el.className = 'cell'; el.dataset.i = i; el._key = '';
@@ -272,30 +418,82 @@ const cells = Array.from({ length: MAX_SLOTS }, (_, i) => {
   return el;
 });
 
+let lastWeather = null;
 function tick() {
   const now = Date.now();
-  let changed = false;
+  advance(now);
+
+  // 天気
+  const w = weatherAt(now), next = weatherAt(now + W_PERIOD);
+  if (w !== lastWeather) {
+    lastWeather = w;
+    $('app').className = `w-${w}`;
+    $('wNow').textContent = `${WEATHERS[w].icon} ${WEATHERS[w].name}`;
+    $('sky').textContent = WEATHERS[w].icon;
+    $('wNext').textContent = `つぎ ${WEATHERS[next].icon}`;
+    if (w === 'rain') showTip('rain');
+    if (w === 'wind') showTip('wind');
+  }
+  $('wTimer').style.width = `${100 - (now % W_PERIOD) / W_PERIOD * 100}%`;
+
+  // 盤面
   state.slots.forEach((s, i) => {
     const el = cells[i];
     if (i >= unlocked()) {
       if (el._key !== 'L') { el._key = 'L'; el.className = 'cell locked'; el.innerHTML = '🔒'; }
       return;
     }
-    if (!s.type && now >= s.spawnAt) { s.type = pickType(); s.born = s.spawnAt; changed = true; }
     if (!s.type) {
       if (el._key !== 'E') { el._key = 'E'; el.className = 'cell'; el.innerHTML = '<div class="water"></div>'; }
       return;
     }
-    const st = stageOf(s, now), damp = st === 2 && isDamp(s, now);
+    const st = stageOf(s), damp = isDamp(s);
     const key = `${s.type}-${st}-${damp}`;
     if (el._key !== key) {
       el._key = key;
       el.className = 'cell' + (st === 2 ? ' ready' : '');
       el.innerHTML = `<div class="water"></div><div class="shio s${st}${damp ? ' damp' : ''}">${shioSVG(s.type, st, damp)}</div>`;
+      if (damp) showTip('damp');
     }
   });
-  if (changed) save();
+
+  renderHud();
+  checkRateTips();
+  save();
 }
+
+function checkRateTips() {
+  const r = state.rate;
+  if (r >= 0.1) showTip('over10');
+  if (r >= 0.5) showTip('half');
+  if (r >= 0.995 && !state.tips.full) { state.tips.full = true; setTimeout(() => openModal('jpModal'), 600); }
+  if (state.tips.half && r < 0.3) showTip('low');
+}
+
+// ---------- まめ知識の吹き出し ----------
+const tipQueue = [];
+let tipTimer = null;
+function showTip(id) {
+  if (state.tips[id]) return;
+  state.tips[id] = true;
+  tipQueue.push(id);
+  if (!tipTimer) nextTip();
+}
+function nextTip() {
+  const el = $('tip');
+  const id = tipQueue.shift();
+  if (!id) { el.classList.remove('show'); tipTimer = null; return; }
+  el.innerHTML = `<div class="shio">${shioSVG('jii')}</div><div><small>まめ知識</small>${TIPS[id]}</div>`;
+  el.classList.add('show');
+  clearTimeout(tipTimer);
+  tipTimer = setTimeout(hideTip, 9000);
+}
+function hideTip() {
+  $('tip').classList.remove('show');
+  clearTimeout(tipTimer);
+  tipTimer = setTimeout(nextTip, 400);
+}
+$('tip').onclick = hideTip;
 
 // ---------- 収穫 ----------
 let audio;
@@ -315,9 +513,9 @@ function pop(pitch = 1) {
 
 const newQueue = [];
 function harvest(i) {
-  const s = state.slots[i], now = Date.now();
-  if (i >= unlocked() || !s.type || stageOf(s, now) < 2) return;
-  const id = isDamp(s, now) ? 'damp' : s.type, t = TYPE[id];
+  const s = state.slots[i];
+  if (i >= unlocked() || !s.type || stageOf(s) < 2) return;
+  const id = isDamp(s) ? 'damp' : s.type, t = TYPE[id];
   const el = cells[i], r = el.getBoundingClientRect();
 
   // 飛んでいく演出
@@ -327,8 +525,8 @@ function harvest(i) {
   document.body.appendChild(fly);
   setTimeout(() => fly.remove(), 700);
   const plus = document.createElement('div');
-  plus.className = 'plus'; plus.textContent = t.sp ? `+${t.sp}` : 'あまい…';
-  Object.assign(plus.style, { left: r.left + r.width / 2 - 14 + 'px', top: r.top + 'px' });
+  plus.className = 'plus'; plus.textContent = t.g ? `+${t.g}g` : 'あまい…';
+  Object.assign(plus.style, { left: r.left + r.width / 2 - 18 + 'px', top: r.top + 'px' });
   document.body.appendChild(plus);
   setTimeout(() => plus.remove(), 900);
   pop(t.rank >= 4 ? 1.5 : 1 + Math.random() * .2);
@@ -336,10 +534,12 @@ function harvest(i) {
   if (!state.dex[id]) newQueue.push(id);
   state.dex[id] = (state.dex[id] || 0) + 1;
   state.sp += t.sp;
-  s.type = null; s.spawnAt = now + spawnDelay();
+  state.stock += t.g;
+  s.type = null; s.wait = spawnDelay();
   el._key = '';
-  save(); tick(); renderHud();
-  if (newQueue.length && !document.getElementById('newModal').classList.contains('open')) setTimeout(showNew, 500);
+  showTip('first');
+  tick();
+  if (newQueue.length && !$('newModal').classList.contains('open')) setTimeout(showNew, 500);
 }
 
 let dragging = false;
@@ -356,16 +556,20 @@ window.addEventListener('pointerup', () => dragging = false);
 window.addEventListener('pointercancel', () => dragging = false);
 
 // ---------- HUD・モーダル ----------
-const discoverable = TYPES.length;
 function renderHud() {
-  document.getElementById('sp').textContent = state.sp.toLocaleString();
-  document.getElementById('dexCount').textContent = `${Object.keys(state.dex).length}/${discoverable}`;
+  const pct = Math.round(state.rate * 100);
+  $('sp').textContent = state.sp.toLocaleString();
+  $('rate').textContent = pct;
+  $('rateFill').style.width = pct + '%';
+  $('stock').textContent = Math.floor(state.stock);
+  $('dexCount').textContent = `${Object.keys(state.dex).length}/${TYPES.length}`;
 }
 
 function openModal(id) {
   if (id === 'dexModal') renderDex();
   if (id === 'shopModal') renderShop();
-  document.getElementById(id).classList.add('open');
+  if (id === 'jpModal') renderJp();
+  $(id).classList.add('open');
 }
 document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => {
   if (e.target === m || e.target.hasAttribute('data-close')) {
@@ -373,12 +577,13 @@ document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e =
     if (m.id === 'newModal' && newQueue.length) setTimeout(showNew, 200);
   }
 }));
-document.getElementById('openDex').onclick = () => openModal('dexModal');
-document.getElementById('openShop').onclick = () => openModal('shopModal');
+$('openDex').onclick = () => openModal('dexModal');
+$('openShop').onclick = () => openModal('shopModal');
+$('openJp').onclick = () => openModal('jpModal');
 
 const stars = n => '★'.repeat(n) + '☆'.repeat(5 - n);
 function renderDex() {
-  const grid = document.getElementById('dexGrid');
+  const grid = $('dexGrid');
   grid.innerHTML = TYPES.map(t => {
     const n = state.dex[t.id];
     return `<div class="card ${n ? '' : 'unknown'}" data-id="${t.id}">
@@ -390,14 +595,14 @@ function renderDex() {
     grid.querySelectorAll('.card').forEach(x => x.classList.remove('sel'));
     c.classList.add('sel');
     const t = TYPE[c.dataset.id], n = state.dex[t.id];
-    document.getElementById('dexDetail').innerHTML = n
-      ? `<b>${t.name}</b>　<span class="stars">${stars(t.rank)}</span><br>${t.desc}<br><small>収穫した数：${n}　／　${t.sp} SP</small>`
-      : 'まだ見つけていない塩。' + (t.id === 'damp' ? '<br><small>ヒント：育った塩をしばらく放っておくと…？</small>' : '');
+    $('dexDetail').innerHTML = n
+      ? `<b>${t.name}</b>　<span class="stars">${stars(t.rank)}</span><br>${t.desc}<span class="mame">💡 ${t.mame}</span><small>収穫した数：${n}</small>`
+      : 'まだ見つけていない塩。' + (t.id === 'damp' ? '<br><small>ヒント：育った塩を雨の中で放っておくと…？</small>' : '');
   });
 }
 
 function renderShop() {
-  document.getElementById('shopList').innerHTML = UPGRADES.map(u => {
+  $('shopList').innerHTML = UPGRADES.map(u => {
     const lv = state.up[u.id], maxed = lv >= u.max, cost = u.cost(lv);
     return `<div class="shop-item"><div class="info"><b>${u.name}</b> Lv.${lv}${maxed ? ' (MAX)' : ''}<br>${u.desc}</div>
       <button class="btn" data-up="${u.id}" ${maxed || state.sp < cost ? 'disabled' : ''}>${maxed ? 'MAX' : cost + ' SP'}</button></div>`;
@@ -406,31 +611,78 @@ function renderShop() {
     const u = UPGRADES.find(x => x.id === b.dataset.up), cost = u.cost(state.up[u.id]);
     if (state.sp < cost || state.up[u.id] >= u.max) return;
     state.sp -= cost; state.up[u.id]++;
-    if (u.id === 'field') state.slots[unlocked() - 1].spawnAt = Date.now() + 1000;
-    pop(1.3); save(); renderShop(); renderHud(); tick();
+    if (u.id === 'field') state.slots[unlocked() - 1].wait = 1000;
+    if (TIPS[u.id]) showTip(u.id);
+    pop(1.3); save(); renderShop(); tick();
   });
 }
-document.getElementById('reset').onclick = () => {
+
+// 出典：財務省「令和6年度 塩需給実績」(単位：千トン)
+const JP = { soda: 5819, biz: 1867, home: 115, total: 7802, domestic: 813, imported: 7066 };
+function renderJp() {
+  const pct = n => (n / JP.total * 100);
+  const supply = JP.domestic + JP.imported;
+  const my = Math.round(state.rate * 100);
+  const intro = state.rate >= 0.995
+    ? `<p>🎉 <b>わが家の塩は自給率100%！</b><br>では、日本全体ではどうなっているんだろう？</p>`
+    : `<p>わが家の自給率は <b>${my}%</b>。<br>では、日本全体ではどうなっているんだろう？</p>`;
+  $('jpPanel').innerHTML = `<button class="close" data-close>×</button>
+    <h2>🗾 日本の塩のいま</h2>${intro}
+
+    <h3>日本でつくる塩と、外国から来る塩</h3>
+    <div class="stack" id="bar1">
+      <div style="background:var(--self)" data-w="${JP.domestic / supply * 100}">国産</div>
+      <div style="background:var(--import)" data-w="${JP.imported / supply * 100}">輸入 約90%</div>
+    </div>
+    <p>日本で使う塩は1年に約<b>780万トン</b>。でも国内でつくっているのは約81万トン、<b>自給率はたった約10%</b>なんだ。</p>
+
+    <h3>その塩、なにに使われているの？</h3>
+    <div class="stack" id="bar2">
+      <div style="background:#7a8fa6" data-w="${pct(JP.soda)}">工業用 約75%</div>
+      <div style="background:#c9a66b" data-w="${pct(JP.biz)}">業務用 24%</div>
+      <div style="background:var(--accent)" data-w="${Math.max(pct(JP.home), 2)}"></div>
+    </div>
+    <div class="legend">
+      <div><i style="background:#7a8fa6"></i>工業用：ガラス・紙・せっけん・水道の消毒などの原料（ほぼ全部が輸入）</div>
+      <div><i style="background:#c9a66b"></i>業務用：食品工場や、冬の道路の雪どけなど</div>
+      <div><i style="background:var(--accent)"></i>家庭用：おうちの料理に使う塩は、たった<b>約1.5%</b></div>
+    </div>
+
+    <div class="callout">
+      国内でつくる塩のほとんどは、<b>電気の力</b>で海水を濃くする方法（イオン交換膜法）でつくられているよ。<br><br>
+      いっぽう、外国から来る塩の多くは<b>太陽と風の力だけ</b>でつくる天日塩。<br>
+      燃料も電気もいらない天日塩を、雨の多い日本でも工夫してつくれたら…？ ☀️🌬️
+    </div>
+
+    <h3>集めたまめ知識（${Object.keys(TIPS).filter(k => k !== 'full' && state.tips[k]).length}/${Object.keys(TIPS).length - 1}）</h3>
+    <ul class="mame-list">${Object.entries(TIPS).filter(([k]) => state.tips[k] && k !== 'full').map(([, v]) => `<li>${v}</li>`).join('') || '<li>塩を育てていると見つかるよ</li>'}</ul>
+
+    <div class="source">出典：財務省「令和6年度 塩需給実績」。数字は四捨五入した約数です。</div>`;
+  requestAnimationFrame(() => requestAnimationFrame(() =>
+    document.querySelectorAll('#jpPanel .stack div').forEach(d => d.style.width = d.dataset.w + '%')));
+}
+
+$('reset').onclick = () => {
   if (!confirm('本当にリセットしますか？図鑑もポイントも消えます。')) return;
   state = freshState(); save();
   cells.forEach(c => c._key = '');
-  document.getElementById('shopModal').classList.remove('open');
-  renderHud(); tick();
+  lastWeather = null;
+  $('shopModal').classList.remove('open');
+  tick();
 };
 
 function showNew() {
   const id = newQueue.shift();
   if (!id) return;
   const t = TYPE[id];
-  document.getElementById('newCard').innerHTML = `<span class="label">NEW!</span>
+  $('newCard').innerHTML = `<span class="label">NEW!</span>
     <div class="shio">${shioSVG(id === 'damp' ? 'futsu' : id, 2, id === 'damp')}</div>
     <h3>${t.name}</h3><div class="stars">${stars(t.rank)}</div>
     <p>${t.desc}</p><button class="btn" data-close>やったー</button>`;
-  document.getElementById('newModal').classList.add('open');
+  $('newModal').classList.add('open');
   pop(1.6);
 }
 
-renderHud();
 tick();
 setInterval(tick, 500);
 </script>
