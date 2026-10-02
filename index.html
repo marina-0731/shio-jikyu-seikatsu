@@ -130,6 +130,17 @@
   .teru-chip svg { width: 100%; height: 100%; }
   .teru-chip small { font-weight: normal; opacity: .65; margin-left: 4px; }
 
+  .scenery { position: absolute; right: 92px; bottom: 14px; z-index: 2; font-size: 22px; line-height: 1; }
+  .treasure { width: 100%; height: 100%; display: flex; align-items: flex-end; justify-content: center; font-size: 40px; line-height: 1; padding-bottom: 6px; pointer-events: none; animation: popin .4s cubic-bezier(.3,1.6,.5,1); filter: drop-shadow(0 0 6px #fff) drop-shadow(0 2px 0 #0002); }
+  .salt.tr::after { content: "✦"; position: absolute; right: 10%; top: 20%; color: #fff; font-size: 16px; text-shadow: 0 0 4px #ffd400; animation: twinkle 1s ease-in-out infinite alternate; pointer-events: none; }
+  @keyframes twinkle { from { opacity: .2; transform: scale(.7); } }
+  .dex-h { font-size: 13px; margin: 14px 0 6px; display: flex; justify-content: space-between; }
+  .dex-h:first-child { margin-top: 0; }
+  .dex .card .tr-ico { font-size: 40px; height: 64px; line-height: 64px; }
+  .dex .card.unknown .tr-ico { filter: brightness(0); opacity: .18; }
+  .dex .card.locked { opacity: .5; }
+  .newcard .tr-ico { font-size: 90px; margin: 10px 0; }
+
   /* バケツをえらぶ */
   .bucket-opts { display: flex; flex-direction: column; gap: 8px; }
   .bucket-opt { display: flex; align-items: center; gap: 12px; text-align: left; font: inherit; color: var(--ink); background: #fff; border: 2px solid #eee; border-radius: 14px; padding: 10px 12px; cursor: pointer; }
@@ -237,10 +248,10 @@
   </div>
 
   <div class="meter">
-    <div class="meter-top"><span>🏠 わが家の塩の自給率 <small style="opacity:.6">｜日本は約10%</small></span><span><b id="rate">0</b>%</span></div>
+    <div class="meter-top"><span id="meterLabel">🏠 わが家の塩の自給率</span><span><b id="rate">0</b>%</span></div>
     <div class="bar"><div class="fill" id="rateFill"></div><div class="jp"></div></div>
     <div class="meter-legend">
-      <span>ストック <b id="stock">0</b>g</span>
+      <span>ストック <b id="stock">0g</b></span>
       <span><span><i style="background:var(--self)"></i>手づくり</span>　<span><i style="background:var(--import)"></i>輸入塩</span></span>
     </div>
   </div>
@@ -251,6 +262,7 @@
       <div class="sky-icon" id="sky">☀️</div>
       <div class="hanging-teru" id="hangingTeru"></div>
       <div class="sea-label">🌊 タップで海水をまく</div>
+      <div class="scenery" id="scenery"></div>
     </div>
     <div id="beach">
       <div id="wet"></div>
@@ -338,6 +350,45 @@ const TYPES = [
   { id: 'gold', name: '金の塩', w: 0.4, sp: 100, g: 30, rank: 5, colors: ['#ffe98a', '#f5c842', '#d9a51c'], face: 'happy', shine: true,
     desc: '伝説の塩。見つけた人には一生しょっぱい幸運が訪れる。',
     mame: '昔、塩はとても貴重だった。英語の「サラリー（給料）」は、塩に関係する言葉から来たという説があるよ。' },
+  // ---- まち ----
+  { id: 'yukidoke', lv: 1, name: 'ゆきどけ塩', w: 8, sp: 8, g: 10, rank: 2, colors: ['#f2f8ff', '#dcebf8', '#c3d9ee'], face: 'happy', acc: '❄️',
+    desc: '冬になると はりきる塩。道路の雪をとかすのが得意。',
+    mame: '雪の多い地域では、冬の道路の雪をとかすのに塩が使われているよ。' },
+  { id: 'tsukemono', lv: 1, name: 'つけもの塩', w: 7, sp: 8, g: 10, rank: 2, colors: ['#eef6e4', '#d6e8c2', '#b9d39c'], face: 'normal', acc: '🥒',
+    desc: 'きゅうりと大の仲よし。ひと晩いっしょにいると、きゅうりがおいしくなる。',
+    mame: 'つけものは、塩で野菜の水分をぬいて、長もちさせる昔からの知恵なんだ。' },
+  { id: 'miso', lv: 1, name: 'みそ塩', w: 5, sp: 12, g: 12, rank: 3, colors: ['#f3e2c6', '#e2c69a', '#c9a674'], face: 'happy', acc: '🍲',
+    desc: 'まちの みそ屋さんで修行中。だいたい いつもあったかい。',
+    mame: 'みそやしょうゆにも、塩がたくさん使われているよ。食品工場で使う塩は「業務用」なんだ。' },
+  { id: 'onigiri', lv: 1, name: 'おにぎり塩', w: 1.5, sp: 40, g: 20, rank: 4, colors: ['#ffffff', '#f4f4f4', '#2f3a33'], face: 'happy', acc: '🍙',
+    desc: 'ついに夢をかなえた塩。のりを まいてもらってご満悦。',
+    mame: '日本で1年に使う塩のうち、業務用（食品工場や雪どけなど）は約24%だよ。' },
+  // ---- けん ----
+  { id: 'soda', lv: 2, name: 'ソーダ塩', w: 8, sp: 15, g: 10, rank: 2, colors: ['#e6f4fb', '#c4e3f3', '#9fcde6'], face: 'cool', acc: '🧪',
+    desc: '工場で働くまじめな塩。電気を通すと、べつのものに変身する。',
+    mame: '塩から「苛性ソーダ」と「塩素」がつくられる。日本で使う塩の約75%が、こうした工業用なんだ。' },
+  { id: 'glass', lv: 2, name: 'ガラス塩', w: 6, sp: 18, g: 10, rank: 3, colors: ['#f4fbfd', '#dff1f6', '#bfe1ea'], face: 'happy', acc: '🪟',
+    desc: 'すきとおった心をもつ塩。まどガラスになるのが目標。',
+    mame: 'ガラスの原料の「ソーダ灰」も、塩からつくられているよ。' },
+  { id: 'sekken', lv: 2, name: 'せっけん塩', w: 5, sp: 18, g: 10, rank: 3, colors: ['#fdf0f6', '#f6d9e8', '#e8bcd3'], face: 'happy', acc: '🫧',
+    desc: 'いつも いいにおいの塩。さわるとちょっとあわだつ。',
+    mame: 'せっけんをつくるのにも、塩からできた苛性ソーダが使われるんだ。' },
+  { id: 'suido', lv: 2, name: 'すいどう塩', w: 1.5, sp: 60, g: 20, rank: 4, colors: ['#e3f1ff', '#bcdcf7', '#92c2ec'], face: 'normal', acc: '🚰',
+    desc: 'みんなの水を守る、たよれる塩。',
+    mame: '水道の水を消毒する塩素も、もとをたどると塩からつくられているよ。' },
+  // ---- くに ----
+  { id: 'fune', lv: 3, name: 'ふね塩', w: 8, sp: 25, g: 10, rank: 2, colors: ['#f6f3ec', '#e1ddd2', '#c2bcae'], face: 'sweat', acc: '🚢',
+    desc: '遠い国から船でやってきた。船よいが まだ治らない。',
+    mame: '日本の輸入塩は、大きな船で何週間もかけて運ばれてくるんだ。' },
+  { id: 'mexico', lv: 3, name: 'メキシコ天日塩', w: 5, sp: 30, g: 12, rank: 3, colors: ['#fff7e6', '#f8e2b8', '#ecc98a'], face: 'happy', acc: '🌵',
+    desc: '太陽をいっぱいあびて育った陽気な塩。',
+    mame: 'メキシコには、とても大きな天日塩田がある。日本に来る塩の多くがメキシコやオーストラリア生まれなんだ。' },
+  { id: 'aussie', lv: 3, name: 'オーストラリア天日塩', w: 5, sp: 30, g: 12, rank: 3, colors: ['#fff1ec', '#f7d5c7', '#e8b39e'], face: 'normal', acc: '🦘',
+    desc: '広い大地の塩田からやってきた、のんびりやの塩。',
+    mame: 'オーストラリアは雨が少なく、晴れの日が多い。天日塩づくりにぴったりなんだ。' },
+  { id: 'niji', lv: 3, name: 'にじいろ塩', w: 0.6, sp: 300, g: 40, rank: 5, colors: ['#ffd6e0', '#d6f0ff', '#e6ffd6'], face: 'happy', shine: true, acc: '🌈',
+    desc: '太陽と風と海が、ぜんぶそろったときにだけ生まれる塩。',
+    mame: '太陽と風だけでつくる天日塩は、燃料も電気もいらない。地球にやさしい塩づくりなんだ。' },
   { id: 'damp', name: 'しけった塩', w: 0, sp: 1, g: 4, rank: 2, colors: ['#e3edf2', '#c8d8e2', '#a9bfcc'], face: 'droopy',
     desc: '放っておかれて湿気てしまった塩。早く収穫してあげよう。',
     mame: '塩は空気中の水分を吸いやすい。湿気の多い日本では、天日干しの途中で塩がしけやすいんだ。' },
@@ -362,10 +413,42 @@ function weatherAt(t) {
 
 const GROW = 40_000;          // 晴れの日に育ちきるまで (ms)
 const DAMP_AFTER = 30 * 60_000; // 育ってから湿気るまで (ms)
-const USE_PER_SEC = 1;        // 家族が1秒に使う塩 (g)
+const USE_PER_SEC = 1;        // 家族が1秒に使う塩 (g)。レベルが上がると need 倍になる
 const RATE_TAU = 120_000;     // 自給率がなじむ速さ (ms)
 const MAX_OFFLINE = 3 * 3600_000;
-const SPOTS = 15;             // 砂浜で塩が生える場所の数
+const SPOTS = 25;             // 砂浜で塩が生える場所の数
+const TREASURE_CHANCE = 0.05; // 塩のかわりに、おたからが落ちている確率
+
+// レベル：mult = 塩1つぶんの量の倍率, need = 使う量の倍率, cap = 一度に育つ数のおまけ
+const LEVELS = [
+  { name: 'わが家', icon: '🏠', mult: 1,      need: 1,      cap: 0, scenery: '🏠' },
+  { name: 'まち',   icon: '🏘️', mult: 50,     need: 65,     cap: 3, scenery: '🏘️' },
+  { name: 'けん',   icon: '🏙️', mult: 2000,   need: 2800,   cap: 6, scenery: '🏭' },
+  { name: 'くに',   icon: '🗾', mult: 100000, need: 150000, cap: 9, scenery: '🚢' },
+];
+const LV = () => LEVELS[state.level];
+function fmtAmount(g) {
+  if (g >= 1e6) return `${+(g / 1e6).toFixed(g >= 1e7 ? 0 : 1)}t`;
+  if (g >= 1e3) return `${+(g / 1e3).toFixed(g >= 1e4 ? 0 : 1)}kg`;
+  return `${Math.floor(g)}g`;
+}
+
+const TREASURES = [
+  { id: 'sakura', icon: '🐚', name: 'さくら貝', w: 25, sp: 5, desc: 'うすいピンクの、小さな貝がら。', mame: '貝がらは、海の生き物がつくった家なんだ。' },
+  { id: 'hitode', icon: '⭐', name: 'ヒトデ', w: 18, sp: 5, desc: '砂浜でひなたぼっこ中。そっと海に帰してあげた。', mame: 'ヒトデは、うでが切れても また生えてくるんだって。' },
+  { id: 'kani', icon: '🦀', name: 'カニ', w: 15, sp: 8, desc: '横歩きで あいさつしてくれた。', mame: 'カニは、えらに水をためて、陸でも息ができるんだ。' },
+  { id: 'glass', icon: '💎', name: 'シーグラス', w: 10, sp: 15, desc: '波にもまれて、角がまるくなったガラスのかけら。', mame: 'シーグラスは、何年も何十年も波にもまれてできるんだ。' },
+  { id: 'wood', icon: '🪵', name: '流木', w: 10, sp: 8, desc: 'どこから流れてきたのかな。', mame: '流木は、川から海へ流れてきた木。ときには遠い国から来ることも。' },
+  { id: 'letter', icon: '✉️', name: 'ビンの手紙', w: 3, sp: 50, desc: '「この塩を食べた人に、いいことがありますように」と書いてあった。', mame: '昔から、海にビンの手紙を流す人がいるんだ。' },
+  { id: 'pet', icon: '🧴', name: 'ペットボトル', w: 10, sp: 10, trash: true, desc: '海のゴミ。拾ってくれてありがとう！', mame: '海に流れたプラスチックは、細かくくだけて「マイクロプラスチック」になってしまうんだ。' },
+  { id: 'bag', icon: '🛍️', name: 'ビニール袋', w: 9, sp: 10, trash: true, desc: '海のゴミ。拾ってくれてありがとう！', mame: 'ウミガメが、ビニール袋をクラゲとまちがえて食べてしまうことがあるんだ。' },
+];
+const TREASURE = Object.fromEntries(TREASURES.map(t => [t.id, t]));
+const pickTreasure = () => {
+  let r = Math.random() * TREASURES.reduce((a, t) => a + t.w, 0);
+  for (const t of TREASURES) if ((r -= t.w) < 0) return t.id;
+  return 'sakura';
+};
 
 const TERU_TIME = 3 * 60_000; // てるてる坊主の効き目
 const TERU_BOOST = 2.5;       // てるてる晴れの加速
@@ -417,6 +500,7 @@ const SPEAKERS = {
   baa: { name: 'おばあちゃん', face: () => BAA_SVG },
 };
 const pct = () => Math.round(state.rate * 100);
+const foundLv = lv => TYPES.filter(t => (t.lv || 0) === lv && state.dex[t.id]).length;
 
 const CHAPTERS = [
   { title: '第1話　浜の塩の精', goal: '海水をまいて、塩を3つ収穫しよう', prog: () => [state.harvested, 3], reward: { sp: 10 },
@@ -474,25 +558,84 @@ const CHAPTERS = [
       ['jii', '日本には、雨をよける「結晶ハウス」で、\n雨の日も天日干しをしておる人たちがいるんじゃ。'],
       ['jii', 'わしらも つくってみよう！'],
     ] },
-  { title: '第8話　塩自給生活', goal: 'わが家の自給率を100%にしよう', prog: () => [pct(), 100], unit: '%', reward: { sp: 200 },
+  { title: '第8話　塩自給生活', goal: 'わが家の自給率を100%にしよう', prog: () => [pct(), 100], unit: '%', reward: { sp: 200, teru: 2 },
     intro: [
       ['jii', 'これで雨にも まけんぞ！'],
       ['jii', 'いよいよじゃ。わが家の塩を、ぜんぶ この浜の塩にするんじゃ！'],
     ] },
-  { title: '最終話　浜から、日本へ', goal: '図鑑をコンプリートしよう', prog: () => [Object.keys(state.dex).length, TYPES.length], reward: { sp: 500, teru: 3 },
+  // ---------- まち ----------
+  { title: 'まち編 第1話　まちの塩屋さん', goal: 'まちの自給率を30%にしよう', prog: () => [pct(), 30], unit: '%', reward: { sp: 300 },
+    gift: { level: 1 },
+    intro: [
+      ['baa', 'すごいわね！ うちの塩は、ぜーんぶ この浜の塩よ！'],
+      ['baa', 'それでね… ご近所さんにも配ったら、まちじゅうで評判になっちゃって。'],
+      ['jii', 'ほっほっ。今度は まちの塩を、この浜でまかなってみるかの？'],
+      ['na', '🏘️ レベルアップ！ わが家 → まち\n浜が広くなって、一度に育つ塩が3つふえた！'],
+      ['jii', 'まちには、おうちよりずっとたくさんの塩がいる。\n食べ物の工場や、冬の道路の雪どけにも使うんじゃ。'],
+      ['jii', 'まちでしか出会えない塩もおるぞ。図鑑を見てみい！'],
+    ] },
+  { title: 'まち編 第2話　まちの味', goal: 'まちの塩を3種類見つけよう', prog: () => [foundLv(1), 3], reward: { sp: 400, teru: 2 },
+    intro: [
+      ['baa', 'おみそ屋さんも、つけもの屋さんも、よろこんでたわよ。'],
+      ['jii', 'みそや しょうゆ、つけもの…\n日本の味は、塩がなくては つくれんのじゃ。'],
+    ] },
+  { title: 'まち編 第3話　まちの塩自給', goal: 'まちの自給率を100%にしよう', prog: () => [pct(), 100], unit: '%', reward: { sp: 800 },
+    intro: [
+      ['jii', 'まちの塩も、もうひといきじゃ！'],
+    ] },
+  // ---------- けん ----------
+  { title: 'けん編 第1話　工場の塩', goal: 'けんの自給率を30%にしよう', prog: () => [pct(), 30], unit: '%', reward: { sp: 1000, teru: 2 },
+    gift: { level: 2 },
+    intro: [
+      ['na', 'ある日、浜に スーツの人がやってきた。'],
+      ['na', '「県の工場でも、この浜の塩を使わせてもらえませんか？」'],
+      ['jii', 'ほう、工場とな。じつはな、日本で使う塩の約75%は、工場で使う塩なんじゃ。'],
+      ['na', '🏙️ レベルアップ！ まち → けん\n浜がさらに広くなった！'],
+      ['jii', 'ガラス、紙、せっけん、水道の消毒…\n塩は、食べるだけじゃないんじゃよ。'],
+    ] },
+  { title: 'けん編 第2話　塩からできるもの', goal: 'けんの塩を3種類見つけよう', prog: () => [foundLv(2), 3], reward: { sp: 1500 },
+    intro: [
+      ['jii', '工場の塩は、ほとんど全部が外国から来ておる。\nだから日本の自給率は約10%なんじゃ。'],
+      ['jii', 'この浜の天日塩で、すこしでも まかなえたらのう。'],
+    ] },
+  { title: 'けん編 第3話　けんの塩自給', goal: 'けんの自給率を100%にしよう', prog: () => [pct(), 100], unit: '%', reward: { sp: 3000, teru: 3 },
+    intro: [
+      ['baa', '新聞にのってたわよ！「浜の天日塩、県の工場へ」ですって。'],
+      ['jii', 'ほっほっ、照れるのう。'],
+    ] },
+  // ---------- くに ----------
+  { title: 'くに編 第1話　海のむこうの塩', goal: 'くにの自給率を30%にしよう', prog: () => [pct(), 30], unit: '%', reward: { sp: 4000 },
+    gift: { level: 3 },
+    intro: [
+      ['jii', 'とうとう、くにじゃ。日本ぜんぶの塩じゃぞ。'],
+      ['na', '🗾 レベルアップ！ けん → くに\n浜が、とても広くなった！'],
+      ['jii', '日本に来る塩の多くは、メキシコやオーストラリアの天日塩田から\n大きな船で運ばれてくる。'],
+      ['jii', 'あちらは雨が少なくて、お日さまがよく照る。\n天日塩づくりに ぴったりの国なんじゃ。'],
+      ['jii', '雨の多い日本でも、てるてる坊主と工夫で がんばるぞい！'],
+    ] },
+  { title: 'くに編 第2話　海をまもる', goal: '浜のおたからを5種類見つけよう', prog: () => [Object.keys(state.tr).length, 5], reward: { sp: 5000, teru: 3 },
+    intro: [
+      ['jii', 'ところで、浜でゴミを見つけたら拾うんじゃぞ。'],
+      ['jii', 'きれいな海がなければ、おいしい塩はつくれんからの。'],
+    ] },
+  { title: 'くに編 最終話　浜から、日本へ', goal: 'くにの自給率を100%にしよう', prog: () => [pct(), 100], unit: '%', reward: { sp: 10000, teru: 3 },
+    intro: [
+      ['jii', 'ここまで来たか…。わしは うれしいぞ。'],
+      ['jii', '太陽と風でつくる塩の輪を、日本じゅうに広げるんじゃ！'],
+    ] },
+  { title: 'おまけ　浜の名人', goal: '図鑑とおたからをコンプリートしよう',
+    prog: () => [Object.keys(state.dex).length + Object.keys(state.tr).length, TYPES.length + TREASURES.length], reward: { sp: 20000 },
     after: () => openModal('jpModal'),
     intro: [
-      ['baa', 'すごいわね！\nうちの塩は、ぜーんぶ この浜の塩よ！'],
-      ['jii', 'ようやった。じゃがな…\n日本で使う塩のほとんどは、工場で使う塩なんじゃ。'],
-      ['jii', 'ガラスや紙、水道の消毒…\nみんなの暮らしは、たくさんの塩に支えられておる。'],
-      ['jii', 'この浜から、町へ、日本へ。\n太陽と風でつくる塩の輪を、広げていこうじゃないか。'],
-      ['na', '日本の塩のいまを見てみよう。'],
+      ['baa', 'テレビで言ってたわよ。「日本の塩、自給率アップ！」ですって。'],
+      ['jii', 'ようやった。この浜から、町へ、県へ、日本へ。\n太陽と風でつくる塩の輪が、ほんとうに広がったんじゃ。'],
+      ['jii', 'じゃが、ほんものの日本の塩の自給率は、まだ約10%じゃ。\nいつか、きみの手で…な。'],
+      ['na', '— 第1部 おしまい —\nこのあとも浜で、塩づくりとコレクションを楽しもう！'],
     ] },
-  { title: '第1部 クリア！', goal: 'つづきは近日公開…！', prog: null,
+  { title: '浜の名人', goal: 'のんびり塩づくりを楽しもう', prog: null,
     intro: [
-      ['jii', '図鑑がいっぱいじゃ！ きみは立派な塩づくり名人じゃ。'],
-      ['jii', 'また いつでも浜においで。\nわしは ここで待っておるからの。'],
-      ['na', '— 第1部 おしまい —'],
+      ['jii', '図鑑もおたからも、ぜんぶそろったのう！\nきみは 立派な浜の名人じゃ。'],
+      ['jii', 'また いつでも浜においで。わしは ここで待っておるからの。'],
     ] },
 ];
 
@@ -505,18 +648,18 @@ function freshState() {
     lastTick: Date.now(),
     wetFrom: 0, wetUntil: 0, bucket: 'm', spawnWait: 600, salts: [], nextId: 1, harvested: 0,
     teru: { count: 0, until: 0, regenAt: 0 },
-    chapter: 0, sceneSeen: -1,
+    chapter: 0, sceneSeen: -1, level: 0, tr: {},
   };
 }
 let state;
 try { state = { ...freshState(), ...JSON.parse(localStorage.getItem(KEY)) }; } catch { state = freshState(); }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} }
 
-const capacity = () => 6 + state.up.field;
+const capacity = () => 6 + state.up.field + LV().cap;
 
 function pickType() {
   const boost = 1 + 0.5 * state.up.rare;
-  const pool = TYPES.filter(t => t.w > 0).map(t => [t, t.w < 10 ? t.w * boost : t.w]);
+  const pool = TYPES.filter(t => t.w > 0 && (t.lv || 0) <= state.level).map(t => [t, t.w < 10 ? t.w * boost : t.w]);
   let r = Math.random() * pool.reduce((s, [, w]) => s + w, 0);
   for (const [t, w] of pool) if ((r -= w) < 0) return t.id;
   return 'futsu';
@@ -528,15 +671,17 @@ function spawnSalt() {
   if (!free.length) return;
   const spot = free[Math.floor(Math.random() * free.length)];
   const j = () => (Math.random() - .5) * 8;
+  const tr = Math.random() < TREASURE_CHANCE;
   state.salts.push({
-    id: state.nextId++, spot, type: pickType(), prog: 0, ready: 0,
-    x: 12 + (spot % 5) * 19 + j(), y: 36 + Math.floor(spot / 5) * 26 + j(),
+    id: state.nextId++, spot, prog: tr ? GROW : 0, ready: 0,
+    ...(tr ? { tr: pickTreasure() } : { type: pickType() }),
+    x: 12 + (spot % 5) * 19 + j(), y: 30 + Math.floor(spot / 5) * 16 + j() * 0.6,
   });
 }
 
 const stageOf = s => s.prog >= GROW ? 2 : s.prog >= GROW * 0.45 ? 1 : 0;
-const isDamp = s => s.prog >= GROW && s.ready >= DAMP_AFTER;
-const scaleOf = s => 0.16 + 0.84 * Math.pow(s.prog / GROW, 0.8);
+const isDamp = s => !s.tr && s.prog >= GROW && s.ready >= DAMP_AFTER;
+const scaleOf = s => s.tr ? 0.75 : 0.16 + 0.84 * Math.pow(s.prog / GROW, 0.8);
 const teruActive = now => now < state.teru.until;
 const isWet = now => now < state.wetUntil;
 const weatherNow = now => teruActive(now) ? 'sun' : weatherAt(now);
@@ -569,7 +714,7 @@ function step(w, dt, boost, wet) {
     else s.ready += dt * dampRate(w);
   }
   // 家族が塩を使う。手づくりのストックがなければ輸入塩を使う
-  const need = USE_PER_SEC * dt / 1000;
+  const need = USE_PER_SEC * LV().need * dt / 1000;
   const own = Math.min(state.stock, need);
   state.stock -= own;
   state.rate += (own / need - state.rate) * (1 - Math.exp(-dt / RATE_TAU));
@@ -606,6 +751,7 @@ function shioSVG(id, stage = 2, damp = false) {
     default: face = eyes + mouth + blush;
   }
 
+  if (t.acc && stage === 2 && !damp) deco += `<text x="76" y="26" font-size="22" text-anchor="middle">${t.acc}</text>`;
   // 粒のうちは色を白く寄せて、ただの結晶っぽく
   const c = stage === 0 ? ['#ffffff', '#f3f6f8', '#e2e8ee'] : [top, left, right];
   return `<svg viewBox="0 0 100 100"><ellipse cx="50" cy="95" rx="30" ry="4" fill="#00000018"/>
@@ -638,8 +784,11 @@ function renderSalts() {
     const st = stageOf(s), damp = isDamp(s), key = `${st}-${damp}`;
     if (el._key !== key) {
       el._key = key;
-      el.classList.toggle('ready', st === 2);
-      el.innerHTML = `<div class="shio${damp ? ' damp' : ''}">${shioSVG(s.type, st, damp)}</div>`;
+      el.classList.toggle('ready', st === 2 && !s.tr);
+      el.classList.toggle('tr', !!s.tr);
+      el.innerHTML = s.tr
+        ? `<div class="treasure">${TREASURE[s.tr].icon}</div>`
+        : `<div class="shio${damp ? ' damp' : ''}">${shioSVG(s.type, st, damp)}</div>`;
       if (damp) showTip('damp');
     }
     el.style.transform = `translate(-50%, -90%) scale(${scaleOf(s).toFixed(3)})`;
@@ -800,25 +949,27 @@ function harvest(sid) {
   if (idx < 0 || scene) return;
   const s = state.salts[idx];
   if (stageOf(s) < 2) return;
-  const id = isDamp(s) ? 'damp' : s.type, t = TYPE[id];
+  const id = s.tr || (isDamp(s) ? 'damp' : s.type), t = s.tr ? TREASURE[id] : TYPE[id];
   const el = saltEls.get(sid), r = el.getBoundingClientRect();
 
-  const fly = el.querySelector('.shio').cloneNode(true);
+  const fly = el.firstElementChild.cloneNode(true);
   Object.assign(fly.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' });
-  fly.className = 'shio fly';
+  fly.classList.add('fly');
   document.body.appendChild(fly);
   setTimeout(() => fly.remove(), 700);
-  floatText(r.left + r.width / 2, r.top, t.g ? `+${t.g}g` : 'あまい…');
+  const grams = (t.g || 0) * LV().mult;
+  floatText(r.left + r.width / 2, r.top, s.tr ? (t.trash ? 'ゴミひろい！' : 'おたから！') : grams ? `+${fmtAmount(grams)}` : 'あまい…');
 
   combo++;
   lastHit = { x: r.left + r.width / 2, y: r.top };
   if (combo >= 2) floatText(lastHit.x, lastHit.y - 26, `${combo}れんぞく！`, true);
   sound(520 * (1 + combo * 0.08), 1100 * (1 + combo * 0.08));
 
-  if (!state.dex[id]) newQueue.push(id);
-  state.dex[id] = (state.dex[id] || 0) + 1;
+  const book = s.tr ? state.tr : state.dex;
+  if (!book[id]) newQueue.push(s.tr ? 'tr:' + id : id);
+  book[id] = (book[id] || 0) + 1;
   state.sp += t.sp;
-  state.stock += t.g;
+  state.stock += grams;
   state.harvested++;
   state.salts.splice(idx, 1);
   tick();
@@ -909,6 +1060,10 @@ $('scene').addEventListener('click', () => {
 function startChapter(prefix = []) {
   const ch = CHAPTERS[state.chapter];
   if (ch.gift?.teru) state.teru.count += ch.gift.teru;
+  if (ch.gift?.level != null && state.level < ch.gift.level) {
+    state.level = ch.gift.level; state.rate = 0; state.stock = 0;
+    state.tips.half = false; // レベルアップで自給率が0%に戻るのは「下がった」扱いにしない
+  }
   save();
   playScene([...prefix, ...ch.intro], () => {
     state.sceneSeen = state.chapter;
@@ -937,8 +1092,10 @@ function renderHud(now) {
   $('sp').textContent = state.sp.toLocaleString();
   $('rate').textContent = pct();
   $('rateFill').style.width = pct() + '%';
-  $('stock').textContent = Math.floor(state.stock);
-  $('dexCount').textContent = `${Object.keys(state.dex).length}/${TYPES.length}`;
+  $('stock').textContent = fmtAmount(state.stock);
+  $('meterLabel').textContent = `${LV().icon} ${LV().name}の塩の自給率`;
+  $('scenery').textContent = LV().scenery;
+  $('dexCount').textContent = `${Object.keys(state.dex).length + Object.keys(state.tr).length}/${TYPES.length + TREASURES.length}`;
 
   const ch = CHAPTERS[state.chapter];
   $('goalCh').textContent = ch.title;
@@ -976,16 +1133,35 @@ $('openJp').onclick = () => openModal('jpModal');
 const stars = n => '★'.repeat(n) + '☆'.repeat(5 - n);
 function renderDex() {
   const grid = $('dexGrid');
-  grid.innerHTML = TYPES.map(t => {
-    const n = state.dex[t.id];
-    return `<div class="card ${n ? '' : 'unknown'}" data-id="${t.id}">
-      <div class="shio">${shioSVG(t.id === 'damp' ? 'futsu' : t.id, 2, t.id === 'damp')}</div>
-      <div>${n ? t.name : '？？？'}</div>
-      <div class="stars">${stars(t.rank)}</div></div>`;
-  }).join('');
+  const sections = LEVELS.map((L, lv) => {
+    const list = TYPES.filter(t => (t.lv || 0) === lv);
+    const found = list.filter(t => state.dex[t.id]).length;
+    const locked = lv > state.level;
+    return `<div class="dex-h"><b>${L.icon} ${L.name}の塩</b><span>${found}/${list.length}</span></div><div class="dex">` +
+      list.map(t => {
+        const n = state.dex[t.id];
+        return `<div class="card ${n ? '' : 'unknown'} ${locked ? 'locked' : ''}" data-id="${t.id}">
+          <div class="shio">${shioSVG(t.id === 'damp' ? 'futsu' : t.id, 2, t.id === 'damp')}</div>
+          <div>${n ? t.name : locked ? `${L.name}で出会える` : '？？？'}</div>
+          <div class="stars">${stars(t.rank)}</div></div>`;
+      }).join('') + '</div>';
+  });
+  const trFound = TREASURES.filter(t => state.tr[t.id]).length;
+  sections.push(`<div class="dex-h"><b>🐚 浜のおたから</b><span>${trFound}/${TREASURES.length}</span></div><div class="dex">` +
+    TREASURES.map(t => `<div class="card ${state.tr[t.id] ? '' : 'unknown'}" data-tr="${t.id}">
+      <div class="tr-ico">${t.icon}</div><div>${state.tr[t.id] ? t.name : '？？？'}</div></div>`).join('') + '</div>');
+  grid.innerHTML = sections.join('');
+  grid.classList.remove('dex');
   grid.querySelectorAll('.card').forEach(c => c.onclick = () => {
     grid.querySelectorAll('.card').forEach(x => x.classList.remove('sel'));
     c.classList.add('sel');
+    if (c.dataset.tr) {
+      const t = TREASURE[c.dataset.tr], n = state.tr[t.id];
+      $('dexDetail').innerHTML = n
+        ? `<b>${t.icon} ${t.name}</b><br>${t.desc}<span class="mame">💡 ${t.mame}</span><small>見つけた数：${n}</small>`
+        : 'まだ見つけていないおたから。砂浜に、ときどき落ちているよ。';
+      return;
+    }
     const t = TYPE[c.dataset.id], n = state.dex[t.id];
     $('dexDetail').innerHTML = n
       ? `<b>${t.name}</b>　<span class="stars">${stars(t.rank)}</span><br>${t.desc}<span class="mame">💡 ${t.mame}</span><small>収穫した数：${n}</small>`
@@ -1017,7 +1193,7 @@ function renderJp() {
   const tipKeys = Object.keys(TIPS);
   $('jpPanel').innerHTML = `<button class="close" data-close>×</button>
     <h2>🗾 日本の塩のいま</h2>
-    <p>わが家の自給率は <b>${pct()}%</b>。<br>では、日本全体ではどうなっているんだろう？</p>
+    <p>${LV().name}の自給率は <b>${pct()}%</b>。<br>では、日本全体ではどうなっているんだろう？</p>
 
     <h3>日本でつくる塩と、外国から来る塩</h3>
     <div class="stack">
@@ -1064,11 +1240,18 @@ function showNew() {
   if (scene) return setTimeout(showNew, 800);
   const id = newQueue.shift();
   if (!id) return;
-  const t = TYPE[id];
-  $('newCard').innerHTML = `<span class="label">NEW!</span>
-    <div class="shio">${shioSVG(id === 'damp' ? 'futsu' : id, 2, id === 'damp')}</div>
-    <h3>${t.name}</h3><div class="stars">${stars(t.rank)}</div>
-    <p>${t.desc}</p><button class="btn" data-close>やったー</button>`;
+  if (id.startsWith('tr:')) {
+    const t = TREASURE[id.slice(3)];
+    $('newCard').innerHTML = `<span class="label">${t.trash ? 'ゴミひろい' : 'おたから'} NEW!</span>
+      <div class="tr-ico">${t.icon}</div><h3>${t.name}</h3>
+      <p>${t.desc}<br><small>💡 ${t.mame}</small></p><button class="btn" data-close>${t.trash ? 'きれいになった！' : 'やったー'}</button>`;
+  } else {
+    const t = TYPE[id];
+    $('newCard').innerHTML = `<span class="label">NEW!</span>
+      <div class="shio">${shioSVG(id === 'damp' ? 'futsu' : id, 2, id === 'damp')}</div>
+      <h3>${t.name}</h3><div class="stars">${stars(t.rank)}</div>
+      <p>${t.desc}</p><button class="btn" data-close>やったー</button>`;
+  }
   $('newModal').classList.add('open');
   sound(780, 1560, 0.3);
 }
