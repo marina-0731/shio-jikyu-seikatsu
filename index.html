@@ -2,8 +2,17 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>塩自給生活</title>
+<meta name="description" content="塩を育てて、塩の自給率と天日塩を学ぶゲーム">
+<meta name="theme-color" content="#bfe6f7">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="塩自給生活">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <style>
   :root {
     --sea: #7cc4e4;
@@ -17,7 +26,8 @@
     --import: #9bb3c4;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { margin: 0; height: 100%; }
+  html, body { margin: 0; height: 100%; overscroll-behavior: none; }
+  body { -webkit-touch-callout: none; }
   body {
     background: linear-gradient(#bfe6f7 0%, #e9f6fb 40%, #f6efe0 100%);
     color: var(--ink);
@@ -26,7 +36,7 @@
     user-select: none; -webkit-user-select: none;
     overflow: hidden;
   }
-  #app { width: 100%; max-width: 520px; height: 100%; display: flex; flex-direction: column; padding: 10px 16px 14px; gap: 8px; position: relative; }
+  #app { width: 100%; max-width: 520px; height: 100%; display: flex; flex-direction: column; padding: calc(10px + env(safe-area-inset-top)) 16px calc(14px + env(safe-area-inset-bottom)); gap: 8px; position: relative; }
 
   header { display: flex; align-items: center; justify-content: space-between; }
   h1 { font-size: 20px; margin: 0; letter-spacing: .05em; }
@@ -164,7 +174,7 @@
 
   /* まめ知識の吹き出し */
   .tip {
-    position: absolute; left: 16px; right: 16px; bottom: 70px; z-index: 160;
+    position: absolute; left: 16px; right: 16px; bottom: calc(70px + env(safe-area-inset-bottom)); z-index: 160;
     background: #fff; border-radius: 16px; padding: 10px 12px; display: flex; gap: 10px; align-items: center;
     box-shadow: 0 6px 20px #0003; font-size: 13px; line-height: 1.6; cursor: pointer;
     transform: translateY(20px); opacity: 0; pointer-events: none; transition: .3s;
@@ -184,7 +194,7 @@
   /* ストーリー */
   #scene { position: fixed; inset: 0; z-index: 300; background: linear-gradient(#0000 30%, #0008); display: none; cursor: pointer; }
   #scene.open { display: block; }
-  .scene-box { position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%); width: calc(100% - 32px); max-width: 488px; background: var(--card); border-radius: 20px; padding: 16px 16px 18px; border: 3px solid #fff; box-shadow: 0 8px 30px #0004; }
+  .scene-box { position: absolute; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); transform: translateX(-50%); width: calc(100% - 32px); max-width: 488px; background: var(--card); border-radius: 20px; padding: 16px 16px 18px; border: 3px solid #fff; box-shadow: 0 8px 30px #0004; }
   .scene-face { position: absolute; left: 14px; top: -64px; width: 80px; height: 80px; background: #fff; border-radius: 50%; padding: 6px; box-shadow: 0 4px 10px #0002; }
   .scene-name { margin-left: 92px; font-weight: bold; color: var(--accent); font-size: 14px; min-height: 18px; }
   .scene-text { margin-top: 8px; font-size: 16px; line-height: 1.75; min-height: 84px; white-space: pre-wrap; }
@@ -1258,6 +1268,12 @@ function showNew() {
 
 tick();
 setInterval(tick, 500);
+// アプリから戻ってきたら、すぐ留守中のぶんを進める
+document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
+
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
 </script>
 </body>
 </html>

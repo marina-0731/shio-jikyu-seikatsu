@@ -1,0 +1,17 @@
+{
+  "name": "塩自給生活",
+  "short_name": "塩自給生活",
+  "description": "塩を育てて、塩の自給率と天日塩を学ぶゲーム",
+  "lang": "ja",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#bfe6f7",
+  "theme_color": "#bfe6f7",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
