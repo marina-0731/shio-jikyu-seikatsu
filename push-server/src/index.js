@@ -3,6 +3,8 @@
 //
 // POST /schedule     { subscription, items: [{ tag, at, title, body }] }  … その端末の予約をまるごと入れかえる
 // POST /unsubscribe  { endpoint }                                         … その端末の予約をすべて消す
+// POST /harvest      { cid, n, g }   … 収穫した数と量を「みんなの浜」に足す
+// GET  /stats                        … みんなの浜の合計（プレイヤー数・収穫数・量）
 
 const MAX_ITEMS = 5;
 const MAX_TEXT = 200;
@@ -12,6 +14,10 @@ export default {
   async fetch(req, env) {
     const cors = corsHeaders(req, env);
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
+    if (req.method === 'GET' && new URL(req.url).pathname === '/stats') {
+      const row = await env.DB.prepare('SELECT salts, grams, (SELECT COUNT(*) FROM players) AS players FROM stats WHERE id = 1').first();
+      return json(row || { salts: 0, grams: 0, players: 0 }, 200, { ...cors, 'Cache-Control': 'public, max-age=60' });
+    }
     if (req.method !== 'POST') return new Response('not found', { status: 404, headers: cors });
 
     let data;
@@ -33,6 +39,19 @@ export default {
       }
       await env.DB.batch(stmts);
       return json({ ok: true, scheduled: items.length }, 200, cors);
+    }
+
+    if (path === '/harvest') {
+      // 1回の送信で足せる量に上限をつけて、いたずらで数字がふくらまないようにする
+      const n = Math.min(200, Math.max(0, Math.floor(data.n) || 0));
+      const g = Math.min(n * 40, Math.max(0, Math.floor(data.g) || 0));
+      const cid = typeof data.cid === 'string' ? data.cid.slice(0, 64) : '';
+      if (!n || !cid) return json({ ok: false }, 400, cors);
+      await env.DB.batch([
+        env.DB.prepare('UPDATE stats SET salts = salts + ?, grams = grams + ? WHERE id = 1').bind(n, g),
+        env.DB.prepare('INSERT OR IGNORE INTO players (cid, first) VALUES (?, ?)').bind(cid, Date.now()),
+      ]);
+      return json({ ok: true }, 200, cors);
     }
 
     if (path === '/unsubscribe') {
@@ -69,7 +88,7 @@ function corsHeaders(req, env) {
   const allowed = (env.ALLOWED_ORIGINS || '').split(',').map(s => s.trim());
   return {
     'Access-Control-Allow-Origin': allowed.includes(origin) ? origin : allowed[0] || '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Vary': 'Origin',
   };

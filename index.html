@@ -151,6 +151,34 @@
   .dex .card.locked { opacity: .5; }
   .newcard .tr-ico { font-size: 90px; margin: 10px 0; }
 
+  /* シェア */
+  .mini { font: inherit; font-size: 11px; font-weight: bold; color: var(--accent); background: #fff1ec; border: none; border-radius: 999px; padding: 3px 9px; cursor: pointer; margin-right: 6px; vertical-align: 3px; }
+  .share-img { width: 100%; border-radius: 14px; display: block; box-shadow: 0 4px 14px #0002; margin-bottom: 12px; }
+  .share-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .share-row .btn { font-size: 13px; text-decoration: none; text-align: center; }
+  .share-row .main { grid-column: 1 / -1; background: var(--accent); color: #fff; }
+  .newcard.rare { overflow: hidden; }
+  .newcard.rare::before { content: ""; position: absolute; left: 50%; top: 32%; width: 600px; height: 600px; margin: -300px 0 0 -300px; z-index: 0; pointer-events: none;
+    background: repeating-conic-gradient(#ffe58a66 0 10deg, transparent 10deg 20deg); animation: rays 8s linear infinite; }
+  .newcard.rare > * { position: relative; z-index: 1; }
+  @keyframes rays { to { transform: rotate(360deg); } }
+  .newcard .row2 { display: flex; gap: 8px; margin-top: 4px; }
+  .newcard .row2 .btn.share { background: var(--accent); color: #fff; }
+
+  /* 収穫のつぶ */
+  .spark { position: fixed; width: 7px; height: 7px; background: #fff; border: 1px solid #c9d6df; transform: rotate(45deg); pointer-events: none; z-index: 52; animation: spark .55s ease-out forwards; }
+  .spark.gold { background: #ffe066; border-color: #e0a800; }
+  @keyframes spark { to { transform: translate(var(--dx), var(--dy)) rotate(225deg) scale(.3); opacity: 0; } }
+  .flash { position: fixed; inset: 0; background: radial-gradient(circle, #fff9 0%, #fff0 70%); pointer-events: none; z-index: 49; animation: flash .5s ease-out forwards; }
+  @keyframes flash { to { opacity: 0; } }
+
+  /* 浜の模様替え */
+  .decor { position: absolute; z-index: 3; font-size: 34px; line-height: 1; pointer-events: none; filter: drop-shadow(0 3px 0 #0002); }
+
+  /* みんなの浜 */
+  .everyone { background: #e9f6fb; border-radius: 12px; padding: 12px; margin-top: 14px; font-size: 14px; line-height: 1.7; }
+  .everyone b.big { font-size: 22px; color: var(--sea-deep); }
+
   /* バケツをえらぶ */
   .bucket-opts { display: flex; flex-direction: column; gap: 8px; }
   .bucket-opt { display: flex; align-items: center; gap: 12px; text-align: left; font: inherit; color: var(--ink); background: #fff; border: 2px solid #eee; border-radius: 14px; padding: 10px 12px; cursor: pointer; }
@@ -258,7 +286,7 @@
   </div>
 
   <div class="meter">
-    <div class="meter-top"><span id="meterLabel">🏠 わが家の塩の自給率</span><span><b id="rate">0</b>%</span></div>
+    <div class="meter-top"><span id="meterLabel">🏠 わが家の塩の自給率</span><span><button class="mini" id="shareRate">📣 シェア</button><b id="rate">0</b>%</span></div>
     <div class="bar"><div class="fill" id="rateFill"></div><div class="jp"></div></div>
     <div class="meter-legend">
       <span>ストック <b id="stock">0g</b></span>
@@ -276,6 +304,7 @@
     </div>
     <div id="beach">
       <div id="wet"></div>
+      <div id="decor"></div>
       <div id="salts"></div>
       <div class="wetgauge">💧<span><i id="wetFill"></i></span><b id="wetText">からから</b></div>
       <div class="splash-hint" id="splashHint">⬆️ 海をタップして海水をまこう</div>
@@ -314,6 +343,8 @@
   <button class="close" data-close>×</button>
   <h2>しおや（天日塩の道具）</h2>
   <div id="shopList"></div>
+  <h2 style="margin-top:18px">🏖 浜のもようがえ</h2>
+  <div id="decorList"></div>
   <h2 style="margin-top:18px">🔔 お知らせ</h2>
   <div class="shop-item"><div class="info" id="notifyInfo"></div><button class="btn" id="notifyBtn"></button></div>
   <button class="reset" id="reset">データをリセット</button>
@@ -326,6 +357,13 @@
   <h2>お知らせを受け取る？</h2>
   <p>アプリを閉じているあいだに、<br>海水がなくなったときや、塩がしけそうなときに<br>しおじいさんが教えてくれるよ。</p>
   <div class="row"><button class="btn" id="notifyLater">あとで</button><button class="btn yes" id="notifyYes">受け取る！</button></div>
+</div></div>
+
+<div class="modal" id="shareModal"><div class="panel">
+  <button class="close" data-close>×</button>
+  <h2>📣 シェアする</h2>
+  <img class="share-img" id="shareImg" alt="">
+  <div class="share-row" id="shareRow"></div>
 </div></div>
 
 <div class="modal" id="jpModal"><div class="panel jp-panel" id="jpPanel"></div></div>
@@ -408,6 +446,38 @@ const TYPES = [
   { id: 'niji', lv: 3, name: 'にじいろ塩', w: 0.6, sp: 300, g: 40, rank: 5, colors: ['#ffd6e0', '#d6f0ff', '#e6ffd6'], face: 'happy', shine: true, acc: '🌈',
     desc: '太陽と風と海が、ぜんぶそろったときにだけ生まれる塩。',
     mame: '太陽と風の力でつくる天日塩は、燃料も電気もほとんどいらない。地球にやさしい塩づくりなんだ。' },
+  // ---- 季節の塩（その時期にだけ出会える） ----
+  { id: 'sakura', group: 'season', when: [3, 4], hint: '3〜4月', name: 'さくら塩', w: 5, sp: 20, g: 10, rank: 3, colors: ['#fff0f4', '#ffd9e4', '#f6bccd'], face: 'happy', acc: '🌸',
+    desc: 'お花見の季節だけ浜にくる。ほんのり桜もちの香り。',
+    mame: '桜の花を塩でつけたものを お湯にうかべると、「桜湯」という飲みものになるよ。' },
+  { id: 'ajisai', group: 'season', when: [6, 6], hint: '6月', name: 'あじさい塩', w: 5, sp: 20, g: 10, rank: 3, colors: ['#eef0ff', '#d5dbff', '#b9b8f0'], face: 'happy', acc: '☔',
+    desc: '雨の日が大好き。梅雨でもニコニコ。',
+    mame: '梅干しは、梅の実を塩でつけてつくる。梅雨のころは、ちょうど梅の実がとれる季節なんだ。' },
+  { id: 'natsu', group: 'season', when: [7, 8], hint: '7〜8月', name: 'すいか塩', w: 5, sp: 20, g: 10, rank: 3, colors: ['#fff4f2', '#ffd6cf', '#8cc98a'], face: 'happy', acc: '🍉',
+    desc: 'スイカにかけられるのを、今か今かと待っている。',
+    mame: '暑い日は、汗といっしょに塩分も出ていく。水といっしょに、塩分も少しとろう。' },
+  { id: 'momiji', group: 'season', when: [10, 11], hint: '10〜11月', name: 'もみじ塩', w: 5, sp: 20, g: 10, rank: 3, colors: ['#fff3e8', '#ffd2b0', '#f0a77a'], face: 'normal', acc: '🍁',
+    desc: '新米のおにぎりと なかよし。秋になると そわそわする。',
+    mame: '塩だけでにぎったおにぎりは「塩むすび」。新米の季節にぴったりなんだ。' },
+  { id: 'fuyu', group: 'season', when: [12, 2], hint: '12〜2月', name: 'しおびき塩', w: 5, sp: 20, g: 10, rank: 3, colors: ['#f4f8fb', '#dfe9f0', '#f2b7a8'], face: 'normal', acc: '🐟',
+    desc: '冬になると、鮭といっしょに軒先でひなたぼっこ。',
+    mame: '新潟県の村上では、鮭を塩につけて干す「塩引き鮭」が冬の名物なんだ。' },
+  { id: 'shogatsu', group: 'season', when: 'newyear', hint: '1月1日〜15日', name: 'おしょうがつ塩', w: 6, sp: 50, g: 10, rank: 4, colors: ['#fffaf0', '#ffe9c2', '#e8463a'], face: 'happy', acc: '🎍',
+    desc: 'お正月だけ来る、おめでたい塩。あけましておめでとう！',
+    mame: '1月11日は「塩の日」。上杉謙信が、ライバルの武田信玄に塩を送ったという言い伝えから来ているよ。' },
+  // ---- ご当地の塩（まちになると、各地から遊びにくる） ----
+  { id: 'ako', group: 'local', name: '赤穂の入浜塩', w: 2.5, sp: 25, g: 12, rank: 3, colors: ['#fbf7ee', '#ece2cc', '#d4c39f'], face: 'old', acc: '🏯',
+    desc: 'お城の町からやってきた、歴史にくわしい塩。',
+    mame: '兵庫県の赤穂は、江戸時代から「入浜式塩田」の塩づくりで有名な町なんだ。' },
+  { id: 'noto', group: 'local', name: '能登の揚げ浜塩', w: 2.5, sp: 25, g: 12, rank: 3, colors: ['#f7f4ee', '#e3dccd', '#c9bea6'], face: 'normal', acc: '🪣',
+    desc: 'この浜と同じやり方で生まれた、親せきのような塩。',
+    mame: '石川県の能登では、砂浜に海水をまいて塩をつくる「揚げ浜式」が今も受けつがれているよ。' },
+  { id: 'setouchi', group: 'local', name: '瀬戸内の塩', w: 2.5, sp: 25, g: 12, rank: 3, colors: ['#f2f9ff', '#d6ebf9', '#b3d6ee'], face: 'happy', acc: '⛵',
+    desc: 'おだやかな海で育った、のんびりやの塩。',
+    mame: '瀬戸内海のまわりは雨が少なく、昔は「十州塩田」とよばれる塩田がたくさんあったんだ。' },
+  { id: 'okinawa', group: 'local', name: '沖縄の塩', w: 2.5, sp: 25, g: 12, rank: 3, colors: ['#f0fbf8', '#cdeee6', '#9fd9cb'], face: 'happy', acc: '🌺',
+    desc: 'サンゴの海からやってきた、陽気な塩。',
+    mame: '沖縄のまわりはサンゴ礁の海。沖縄には、海水から塩をつくる工房がたくさんあるよ。' },
   { id: 'damp', name: 'しけった塩', w: 0, sp: 1, g: 4, rank: 2, colors: ['#e3edf2', '#c8d8e2', '#a9bfcc'], face: 'droopy',
     desc: '放っておかれて湿気てしまった塩。早く収穫してあげよう。',
     mame: '塩は空気中の水分を吸いやすいんだ。育ったら、しける前に収穫してあげよう。' },
@@ -645,7 +715,8 @@ const CHAPTERS = [
       ['jii', '太陽と風でつくる塩の輪を、日本じゅうに広げるんじゃ！'],
     ] },
   { title: 'おまけ　浜の名人', goal: '図鑑とおたからをコンプリートしよう',
-    prog: () => [Object.keys(state.dex).length + Object.keys(state.tr).length, TYPES.length + TREASURES.length], reward: { sp: 20000 },
+    prog: () => [TYPES.filter(t => t.group !== 'season' && state.dex[t.id]).length + Object.keys(state.tr).length,
+      TYPES.filter(t => t.group !== 'season').length + TREASURES.length], reward: { sp: 20000 },
     after: () => openModal('jpModal'),
     intro: [
       ['baa', 'テレビで言ってたわよ。「日本の塩、自給率アップ！」ですって。'],
@@ -669,7 +740,8 @@ function freshState() {
     lastTick: Date.now(),
     wetFrom: 0, wetUntil: 0, bucket: 'm', spawnWait: 600, salts: [], nextId: 1, harvested: 0,
     teru: { count: 0, until: 0, regenAt: 0 },
-    chapter: 0, sceneSeen: -1, level: 0, tr: {},
+    chapter: 0, sceneSeen: -1, level: 0, tr: {}, decor: {}, lastDay: '',
+    cid: (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2)),
   };
 }
 let state;
@@ -678,9 +750,26 @@ function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catc
 
 const capacity = () => 6 + state.up.field + LV().cap;
 
+function inSeason(t, d = new Date()) {
+  if (t.when === 'newyear') return d.getMonth() === 0 && d.getDate() <= 15;
+  const m = d.getMonth() + 1, [a, b] = t.when;
+  return a <= b ? m >= a && m <= b : m >= a || m <= b;
+}
+function available(t) {
+  if (t.w <= 0) return false;
+  if (t.group === 'season') return inSeason(t);
+  if (t.group === 'local') return state.level >= 1;
+  return (t.lv || 0) <= state.level;
+}
+// きょうの注目の塩：日付で決まる、出やすくなる塩
+function featuredType(d = new Date()) {
+  const list = TYPES.filter(t => !t.group && t.rank >= 2 && t.rank <= 3 && (t.lv || 0) <= state.level && t.w > 0);
+  const n = d.getFullYear() * 400 + d.getMonth() * 31 + d.getDate();
+  return list[n % list.length];
+}
 function pickType() {
-  const boost = 1 + 0.5 * state.up.rare;
-  const pool = TYPES.filter(t => t.w > 0 && (t.lv || 0) <= state.level).map(t => [t, t.w < 10 ? t.w * boost : t.w]);
+  const boost = 1 + 0.5 * state.up.rare, feat = featuredType();
+  const pool = TYPES.filter(available).map(t => [t, (t.w < 10 ? t.w * boost : t.w) * (t === feat ? 3 : 1)]);
   let r = Math.random() * pool.reduce((s, [, w]) => s + w, 0);
   for (const [t, w] of pool) if ((r -= w) < 0) return t.id;
   return 'futsu';
@@ -964,6 +1053,46 @@ function sound(f1 = 520, f2 = 1100, dur = 0.15, type = 'sine') {
     o.start(t); o.stop(t + dur + 0.01);
   } catch {}
 }
+// ぽんっ、と抜ける音。れんぞくすると音階が上がっていく
+const SCALE = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24];
+function popSound(rank, n) {
+  try {
+    audio ||= new (window.AudioContext || window.webkitAudioContext)();
+    const t = audio.currentTime, base = 440 * 2 ** (SCALE[Math.min(n - 1, SCALE.length - 1)] / 12);
+    const o = audio.createOscillator(), g = audio.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(base * 1.6, t);
+    o.frequency.exponentialRampToValueAtTime(base, t + 0.05);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.22, t + 0.008);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
+    o.connect(g).connect(audio.destination);
+    o.start(t); o.stop(t + 0.17);
+    if (rank >= 3) {  // めずらしい塩は、きらっと鳴る
+      [0, 0.07, 0.14].forEach((d, i) => {
+        const o2 = audio.createOscillator(), g2 = audio.createGain();
+        o2.type = 'triangle'; o2.frequency.value = base * 2 * 2 ** ([0, 4, 7][i] / 12);
+        g2.gain.setValueAtTime(0.0001, t + d);
+        g2.gain.exponentialRampToValueAtTime(0.08, t + d + 0.01);
+        g2.gain.exponentialRampToValueAtTime(0.001, t + d + 0.3);
+        o2.connect(g2).connect(audio.destination);
+        o2.start(t + d); o2.stop(t + d + 0.31);
+      });
+    }
+  } catch {}
+}
+function sparks(x, y, rare) {
+  const n = rare ? 14 : 8;
+  for (let i = 0; i < n; i++) {
+    const el = document.createElement('div'), a = Math.random() * Math.PI * 2, d = 30 + Math.random() * (rare ? 70 : 40);
+    el.className = 'spark' + (rare && i % 2 ? ' gold' : '');
+    el.style.left = x + 'px'; el.style.top = y + 'px';
+    el.style.setProperty('--dx', Math.cos(a) * d + 'px'); el.style.setProperty('--dy', Math.sin(a) * d - 20 + 'px');
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 600);
+  }
+  if (rare) { const f = document.createElement('div'); f.className = 'flash'; document.body.appendChild(f); setTimeout(() => f.remove(), 500); }
+}
 function floatText(x, y, text, combo = false) {
   const el = document.createElement('div');
   el.className = 'plus' + (combo ? ' combo' : '');
@@ -994,7 +1123,11 @@ function harvest(sid) {
   combo++;
   lastHit = { x: r.left + r.width / 2, y: r.top };
   if (combo >= 2) floatText(lastHit.x, lastHit.y - 26, `${combo}れんぞく！`, true);
-  sound(520 * (1 + combo * 0.08), 1100 * (1 + combo * 0.08));
+  const rank = t.rank || (t.w < 5 ? 4 : 2);
+  popSound(rank, combo);
+  sparks(r.left + r.width / 2, r.top + r.height * 0.6, rank >= 4);
+  try { navigator.vibrate?.(rank >= 4 ? [12, 40, 12] : 8); } catch {}
+  if (!s.tr) everyone.add(t.g || 0);
 
   const book = s.tr ? state.tr : state.dex;
   if (!book[id]) newQueue.push(s.tr ? 'tr:' + id : id);
@@ -1034,14 +1167,18 @@ let tipTimer = null;
 function showTip(id) {
   if (state.tips[id]) return;
   state.tips[id] = true;
-  tipQueue.push(id);
+  tipQueue.push({ label: 'まめ知識', text: TIPS[id] });
+  if (!tipTimer) nextTip();
+}
+function bubble(text, label) {
+  tipQueue.push({ label, text });
   if (!tipTimer) nextTip();
 }
 function nextTip() {
   const el = $('tip');
   const id = tipQueue.shift();
   if (!id) { el.classList.remove('show'); tipTimer = null; return; }
-  el.innerHTML = `<div class="shio">${shioSVG('jii')}</div><div><small>まめ知識</small>${TIPS[id]}</div>`;
+  el.innerHTML = `<div class="shio">${shioSVG('jii')}</div><div><small>${id.label}</small>${id.text.replace(/\n/g, '<br>')}</div>`;
   el.classList.add('show');
   clearTimeout(tipTimer);
   tipTimer = setTimeout(hideTip, 9000);
@@ -1054,7 +1191,7 @@ function hideTip() {
 $('tip').onclick = hideTip;
 
 // ---------- ストーリー進行 ----------
-let scene = null;
+let scene = null, pendingShare = null;
 function playScene(lines, done) {
   scene = { lines, i: 0, done };
   $('scene').classList.add('open');
@@ -1100,6 +1237,7 @@ function startChapter(prefix = []) {
     state.sceneSeen = state.chapter;
     save(); tick();
     ch.after && ch.after();
+    if (pendingShare) { const sh = pendingShare; pendingShare = null; setTimeout(() => openShare(sh), 400); }
   });
 }
 function checkChapter() {
@@ -1113,6 +1251,7 @@ function checkChapter() {
   state.sp += r.sp || 0;
   state.teru.count += r.teru || 0;
   const items = [r.sp && `${r.sp} SP`, r.teru && `てるてる坊主 ×${r.teru}`].filter(Boolean).join('、');
+  if (ch.unit === '%' && max === 100) pendingShare = { kind: 'rate', level: state.level, pct: 100 };
   state.chapter++;
   sound(660, 1320, 0.4);
   startChapter([['na', `🎉 「${ch.title.replace(/^.*?　/, '')}」クリア！${items ? `\nごほうび：${items}` : ''}`]]);
@@ -1164,8 +1303,17 @@ $('openJp').onclick = () => openModal('jpModal');
 const stars = n => '★'.repeat(n) + '☆'.repeat(5 - n);
 function renderDex() {
   const grid = $('dexGrid');
+  const card = (t, lockedText) => {
+    const n = state.dex[t.id];
+    return `<div class="card ${n ? '' : 'unknown'} ${lockedText ? 'locked' : ''}" data-id="${t.id}">
+      <div class="shio">${shioSVG(t.id === 'damp' ? 'futsu' : t.id, 2, t.id === 'damp')}</div>
+      <div>${n ? t.name : lockedText || '？？？'}</div>
+      <div class="stars">${stars(t.rank)}</div></div>`;
+  };
+  const group = (title, list, lockedText) => `<div class="dex-h"><b>${title}</b><span>${list.filter(t => state.dex[t.id]).length}/${list.length}</span></div><div class="dex">` +
+    list.map(t => card(t, typeof lockedText === 'function' ? lockedText(t) : lockedText)).join('') + '</div>';
   const sections = LEVELS.map((L, lv) => {
-    const list = TYPES.filter(t => (t.lv || 0) === lv);
+    const list = TYPES.filter(t => !t.group && (t.lv || 0) === lv);
     const found = list.filter(t => state.dex[t.id]).length;
     const locked = lv > state.level;
     return `<div class="dex-h"><b>${L.icon} ${L.name}の塩</b><span>${found}/${list.length}</span></div><div class="dex">` +
@@ -1177,6 +1325,8 @@ function renderDex() {
           <div class="stars">${stars(t.rank)}</div></div>`;
       }).join('') + '</div>';
   });
+  sections.push(group('🌸 季節の塩', TYPES.filter(t => t.group === 'season'), t => state.dex[t.id] || inSeason(t) ? '' : `${t.hint}に出会える`));
+  sections.push(group('🗾 ご当地の塩', TYPES.filter(t => t.group === 'local'), state.level >= 1 ? '' : 'まちで出会える'));
   const trFound = TREASURES.filter(t => state.tr[t.id]).length;
   sections.push(`<div class="dex-h"><b>🐚 浜のおたから</b><span>${trFound}/${TREASURES.length}</span></div><div class="dex">` +
     TREASURES.map(t => `<div class="card ${state.tr[t.id] ? '' : 'unknown'}" data-tr="${t.id}">
@@ -1195,13 +1345,37 @@ function renderDex() {
     }
     const t = TYPE[c.dataset.id], n = state.dex[t.id];
     $('dexDetail').innerHTML = n
-      ? `<b>${t.name}</b>　<span class="stars">${stars(t.rank)}</span><br>${t.desc}<span class="mame">💡 ${t.mame}</span><small>収穫した数：${n}</small>`
-      : 'まだ見つけていない塩。' + (t.id === 'damp' ? '<br><small>ヒント：育った塩を雨の中で放っておくと…？</small>' : '');
+      ? `<b>${t.name}</b>　<span class="stars">${stars(t.rank)}</span><br>${t.desc}<span class="mame">💡 ${t.mame}</span><small>収穫した数：${n}</small>
+         <div style="margin-top:8px"><button class="mini" id="dexShare">📣 この塩をシェア</button></div>`
+      : 'まだ見つけていない塩。' + (t.id === 'damp' ? '<br><small>ヒント：育った塩を雨の中で放っておくと…？</small>' : '')
+        + (t.group === 'season' ? `<br><small>${t.hint}ごろに、浜にやってくるよ。</small>` : '');
+    if (n) $('dexShare').onclick = () => { $('dexModal').classList.remove('open'); openShare({ kind: 'salt', id: t.id }); };
   });
 }
 
+const DECOR = [
+  { id: 'parasol', icon: '⛱️', name: 'ビーチパラソル', cost: 200, pos: 'left:2%; top:62%' },
+  { id: 'flag', icon: '🚩', name: 'のぼり旗', cost: 300, pos: 'right:3%; top:44%' },
+  { id: 'palm', icon: '🌴', name: 'ヤシの木', cost: 400, pos: 'left:1%; top:24%; font-size:42px' },
+  { id: 'hut', icon: '🛖', name: '塩づくり小屋', cost: 600, pos: 'right:2%; top:12%; font-size:42px' },
+  { id: 'turtle', icon: '🐢', name: 'ウミガメのお客さん', cost: 1000, pos: 'left:44%; bottom:1%' },
+];
+function renderDecor() {
+  $('decor').innerHTML = DECOR.filter(d => state.decor[d.id]).map(d => `<div class="decor" style="${d.pos}">${d.icon}</div>`).join('');
+}
 function renderShop() {
   renderNotify();
+  $('decorList').innerHTML = DECOR.map(d => {
+    const owned = state.decor[d.id];
+    return `<div class="shop-item"><div class="info"><b>${d.icon} ${d.name}</b></div>
+      <button class="btn" data-decor="${d.id}" ${owned || state.sp < d.cost ? 'disabled' : ''}>${owned ? 'おいたよ' : d.cost + ' SP'}</button></div>`;
+  }).join('');
+  document.querySelectorAll('[data-decor]').forEach(b => b.onclick = () => {
+    const d = DECOR.find(x => x.id === b.dataset.decor);
+    if (state.sp < d.cost || state.decor[d.id]) return;
+    state.sp -= d.cost; state.decor[d.id] = true;
+    sound(700, 1400); save(); renderShop(); renderDecor(); renderHud(Date.now());
+  });
   $('shopList').innerHTML = UPGRADES.map(u => {
     const lv = state.up[u.id], maxed = lv >= u.max, cost = u.cost(lv);
     return `<div class="shop-item"><div class="info"><b>${u.name}</b> Lv.${lv}${maxed ? ' (MAX)' : ''}<br>${u.desc}</div>
@@ -1255,7 +1429,11 @@ function renderJp() {
     <h3>集めたまめ知識（${tipKeys.filter(k => state.tips[k]).length}/${tipKeys.length}）</h3>
     <ul class="mame-list">${tipKeys.filter(k => state.tips[k]).map(k => `<li>${TIPS[k]}</li>`).join('') || '<li>塩を育てていると見つかるよ</li>'}</ul>
 
-    <div class="source">出典：財務省「令和6年度 塩需給実績」。数字は四捨五入した約数です。</div>`;
+    <div id="everyoneBox">${everyoneHTML(everyone.stats)}</div>
+    <div style="margin-top:12px"><button class="btn" id="jpShare" style="width:100%">📣 わが家の自給率をシェア</button></div>
+    <div class="source">出典：財務省「令和6年度 塩需給実績」、厚生労働省「令和5年 国民健康・栄養調査」。数字は四捨五入した約数です。</div>`;
+  $('jpShare').onclick = () => { $('jpModal').classList.remove('open'); openShare({ kind: 'rate', level: state.level, pct: pct() }); };
+  everyone.load().then(st => { if (st && $('everyoneBox')) $('everyoneBox').innerHTML = everyoneHTML(st); });
   requestAnimationFrame(() => requestAnimationFrame(() =>
     document.querySelectorAll('#jpPanel .stack div').forEach(d => d.style.width = d.dataset.w + '%')));
 }
@@ -1278,11 +1456,14 @@ function showNew() {
       <div class="tr-ico">${t.icon}</div><h3>${t.name}</h3>
       <p>${t.desc}<br><small>💡 ${t.mame}</small></p><button class="btn" data-close>${t.trash ? 'きれいになった！' : 'やったー'}</button>`;
   } else {
-    const t = TYPE[id];
-    $('newCard').innerHTML = `<span class="label">NEW!</span>
+    const t = TYPE[id], rare = t.rank >= 4;
+    $('newCard').innerHTML = `<span class="label">${rare ? '✨ レア ' : ''}NEW!</span>
       <div class="shio">${shioSVG(id === 'damp' ? 'futsu' : id, 2, id === 'damp')}</div>
       <h3>${t.name}</h3><div class="stars">${stars(t.rank)}</div>
-      <p>${t.desc}</p><button class="btn" data-close>やったー</button>`;
+      <p>${t.desc}</p>
+      <div class="row2"><button class="btn" data-close>やったー</button>${rare || t.group ? `<button class="btn share" id="newShare">📣 見せる</button>` : ''}</div>`;
+    $('newCard').classList.toggle('rare', rare);
+    $('newShare') && ($('newShare').onclick = () => { $('newModal').classList.remove('open'); openShare({ kind: 'salt', id }); });
   }
   $('newModal').classList.add('open');
   sound(780, 1560, 0.3);
@@ -1296,7 +1477,8 @@ const VAPID_PUBLIC = 'BC9vja_mNqF5bUiE-F33JMw8LrZAvl10K5I7hM8DQqo_j8YiHBmBPywX4j
 const DAMP_WARN = 5 * 60_000;   // しける何分前に知らせるか
 let pushSub = null;
 
-const pushSupported = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window && location.protocol.startsWith('http');
+const SERVER_READY = !PUSH_SERVER.includes('REPLACE');
+const pushSupported = () => SERVER_READY && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window && location.protocol.startsWith('http');
 const isIOS = () => /iPhone|iPad|iPod/.test(navigator.userAgent);
 
 function predictNotices(now) {
@@ -1360,6 +1542,10 @@ async function disableNotify() {
 function renderNotify() {
   const btn = $('notifyBtn'), info = $('notifyInfo');
   btn.disabled = false;
+  if (!SERVER_READY) {
+    info.innerHTML = '<b>じゅんび中</b><br>もうすぐ使えるようになるよ。';
+    btn.textContent = '—'; btn.disabled = true; return;
+  }
   if (!pushSupported()) {
     info.innerHTML = isIOS()
       ? '<b>ホーム画面に追加すると使えるよ</b><br>Safariの共有ボタン →「ホーム画面に追加」から開いてね。'
@@ -1374,19 +1560,165 @@ function renderNotify() {
   btn.textContent = state.notify ? 'オフにする' : 'オンにする';
   btn.onclick = () => state.notify ? disableNotify() : enableNotify();
 }
+// ---------- シェア ----------
+const GAME_URL = 'https://marina-0731.github.io/shio-jikyu-seikatsu/';
+const FONT = '"Hiragino Maru Gothic ProN", "Rounded Mplus 1c", "Hiragino Sans", sans-serif';
+
+function svgImage(svg) {
+  return new Promise((ok, ng) => {
+    const img = new Image();
+    img.onload = () => ok(img); img.onerror = ng;
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" '));
+  });
+}
+function roundRect(c, x, y, w, h, r) { c.beginPath(); c.roundRect(x, y, w, h, r); }
+
+async function makeCard(opt) {
+  const S = 1080, cv = document.createElement('canvas');
+  cv.width = cv.height = S;
+  const c = cv.getContext('2d');
+  // 空・海・砂浜
+  let g = c.createLinearGradient(0, 0, 0, S * 0.36);
+  g.addColorStop(0, '#bfe6f7'); g.addColorStop(1, '#7cc4e4');
+  c.fillStyle = g; c.fillRect(0, 0, S, S * 0.36);
+  c.fillStyle = '#4a9cc4'; c.fillRect(0, S * 0.36, S, S * 0.06);
+  g = c.createLinearGradient(0, S * 0.42, 0, S);
+  g.addColorStop(0, '#f1e2bf'); g.addColorStop(1, '#e2cea0');
+  c.fillStyle = g; c.fillRect(0, S * 0.42, S, S);
+  c.fillStyle = '#f1e2bf';
+  for (let x = -40; x < S + 80; x += 90) { c.beginPath(); c.ellipse(x, S * 0.42, 55, 26, 0, 0, Math.PI * 2); c.fill(); }
+  c.fillStyle = '#ffd65a'; c.beginPath(); c.arc(S - 120, 110, 60, 0, Math.PI * 2); c.fill();
+  c.fillStyle = '#4a3b2a'; c.textBaseline = 'alphabetic';
+  c.font = `bold 64px ${FONT}`; c.fillText('塩自給生活', 60, 110);
+  c.font = `28px ${FONT}`; c.globalAlpha = .6; c.fillText('SALT SELF-SUFFICIENCY LIFE', 62, 152); c.globalAlpha = 1;
+
+  // 白いカード
+  c.fillStyle = '#fffaf0'; roundRect(c, 60, 220, S - 120, S - 330, 48); c.fill();
+  c.textAlign = 'center';
+  if (opt.kind === 'rate') {
+    const L = LEVELS[opt.level], p = opt.pct;
+    c.fillStyle = '#4a3b2a'; c.font = `bold 50px ${FONT}`;
+    c.fillText(`${L.icon} ${L.name}の塩の自給率`, S / 2, 320);
+    c.fillStyle = '#f0a830'; c.font = `bold 230px ${FONT}`;
+    c.fillText(`${p}%`, S / 2, 540);
+    // バー
+    c.fillStyle = '#9bb3c4'; roundRect(c, 140, 590, S - 280, 44, 22); c.fill();
+    c.fillStyle = '#f0a830'; roundRect(c, 140, 590, Math.max(44, (S - 280) * p / 100), 44, 22); c.fill();
+    c.fillStyle = '#4a3b2a'; c.fillRect(140 + (S - 280) * 0.1 - 3, 578, 6, 68);
+    c.font = `bold 44px ${FONT}`;
+    c.fillText('ちなみに日本の塩の自給率は 約10%', S / 2, 730);
+    c.font = `40px ${FONT}`; c.fillStyle = '#6a5a48';
+    c.fillText('海に囲まれた国なのに…！🌊', S / 2, 800);
+    const img = await svgImage(shioSVG('jii')).catch(() => null);
+    if (img) c.drawImage(img, S - 290, 800, 170, 170);
+  } else {
+    const t = TYPE[opt.id];
+    c.fillStyle = '#e8735a'; c.font = `bold 46px ${FONT}`;
+    c.fillText(t.rank >= 4 ? '✨ レアな塩が出た！ ✨' : '浜で塩が育った！', S / 2, 310);
+    const img = await svgImage(shioSVG(t.id === 'damp' ? 'futsu' : t.id, 2, t.id === 'damp')).catch(() => null);
+    if (img) c.drawImage(img, S / 2 - 200, 330, 400, 400);
+    c.fillStyle = '#4a3b2a'; c.font = `bold 72px ${FONT}`;
+    c.fillText(t.name, S / 2, 800);
+    c.fillStyle = '#f0b400'; c.font = `44px ${FONT}`;
+    c.fillText(stars(t.rank), S / 2, 860);
+    c.fillStyle = '#6a5a48'; c.font = `32px ${FONT}`;
+    c.fillText(t.desc.length > 28 ? t.desc.slice(0, 27) + '…' : t.desc, S / 2, 920);
+  }
+  c.fillStyle = '#4a3b2a'; c.font = `bold 34px ${FONT}`;
+  c.fillText('#塩自給生活', S / 2, S - 40);
+  return new Promise(ok => cv.toBlob(ok, 'image/png'));
+}
+
+function shareText(opt) {
+  if (opt.kind === 'rate') return `${LEVELS[opt.level].name}の塩の自給率は${opt.pct}%！\nちなみに日本の塩の自給率は約10%。海に囲まれた国なのに…🌊\n#塩自給生活`;
+  const t = TYPE[opt.id];
+  return `浜で「${t.name}」が育った！${t.rank >= 4 ? '✨' : ''}\n${t.mame}\n#塩自給生活`;
+}
+
+let shareURL = null;
+async function openShare(opt) {
+  const blob = await makeCard(opt);
+  const text = shareText(opt);
+  if (shareURL) URL.revokeObjectURL(shareURL);
+  shareURL = URL.createObjectURL(blob);
+  $('shareImg').src = shareURL;
+  const file = new File([blob], 'shio-jikyu.png', { type: 'image/png' });
+  const canFile = navigator.canShare?.({ files: [file] });
+  $('shareRow').innerHTML = `
+    ${navigator.share ? `<button class="btn main" id="shareNative">📤 シェアする</button>` : ''}
+    <a class="btn" target="_blank" rel="noopener" href="https://x.com/intent/post?text=${encodeURIComponent(text)}&url=${encodeURIComponent(GAME_URL)}">𝕏 にポスト</a>
+    <a class="btn" target="_blank" rel="noopener" href="https://line.me/R/share?text=${encodeURIComponent(text + '\n' + GAME_URL)}">LINE で送る</a>
+    <a class="btn" style="grid-column:1/-1" download="shio-jikyu.png" href="${shareURL}">🖼 画像を保存</a>`;
+  if ($('shareNative')) $('shareNative').onclick = async () => {
+    try {
+      await navigator.share(canFile ? { files: [file], text: text + '\n' + GAME_URL } : { text, url: GAME_URL });
+      state.flags.shared = (state.flags.shared || 0) + 1; save();
+    } catch {}
+  };
+  openModal('shareModal');
+}
+$('shareRate').onclick = () => openShare({ kind: 'rate', level: state.level, pct: pct() });
+
+// ---------- みんなの浜（全国のプレイヤーの合計） ----------
+const PERSON_YEAR_G = 9.8 * 365;  // 日本人1人が1年にとる食塩（1日9.8g）
+const everyone = {
+  n: 0, g: 0, stats: null,
+  add(g) { this.n++; this.g += g; },
+  flush(keepalive = false) {
+    if (!SERVER_READY || !this.n) return;
+    const body = JSON.stringify({ cid: state.cid, n: this.n, g: this.g });
+    this.n = 0; this.g = 0;
+    fetch(PUSH_SERVER + '/harvest', { method: 'POST', keepalive, headers: { 'Content-Type': 'application/json' }, body }).catch(() => {});
+  },
+  async load() {
+    if (!SERVER_READY) return null;
+    try { this.stats = await (await fetch(PUSH_SERVER + '/stats')).json(); } catch {}
+    return this.stats;
+  },
+};
+setInterval(() => everyone.flush(), 30_000);
+function everyoneHTML(st) {
+  if (!st) return '';
+  const people = Math.floor(st.grams / PERSON_YEAR_G);
+  return `<div class="everyone">🌏 <b>みんなの浜</b><br>
+    全国の ${st.players.toLocaleString()}人で収穫した塩は <b class="big">${fmtAmount(st.grams)}</b><br>
+    日本人 <b>${people.toLocaleString()}人</b>が1年に食べる塩と同じくらい！<br>
+    <small>（1人1日 約9.8g で計算）</small></div>`;
+}
+
+// ---------- 毎日のごほうび ----------
+function dailyCheck() {
+  const d = new Date(), today = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+  if (state.lastDay === today || scene || state.chapter < 1) return;
+  const first = !state.lastDay;
+  state.lastDay = today;
+  const feat = featuredType(d);
+  let msg = `きょうの注目の塩は「${state.dex[feat.id] ? feat.name : '？？？'}」。いつもより出やすいよ！`;
+  if (state.chapter >= 2 && !first) {
+    state.teru.count = Math.min(TERU_MAX + 2, state.teru.count + 1);
+    msg = 'きょうも来てくれてありがとう！ てるてる坊主を1つ あげよう。\n' + msg;
+  }
+  bubble(msg, '☀️ きょうの浜');
+  save();
+}
+
 $('notifyYes').onclick = () => { $('notifyModal').classList.remove('open'); enableNotify(); };
 $('notifyLater').onclick = () => $('notifyModal').classList.remove('open');
 
 tick();
+renderDecor();
 setInterval(tick, 500);
+setTimeout(dailyCheck, 1500);
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
+    everyone.flush(true);
     advance(Date.now()); save();
     sendSchedule(predictNotices(Date.now()));
   } else {
     // アプリに戻ってきたら、すぐ留守中のぶんを進めて、予約は取り消す
     tick();
     sendSchedule([]);
+    dailyCheck();
   }
 });
 
