@@ -8,7 +8,7 @@ crons = ["* * * * *"]
 [[d1_databases]]
 binding = "DB"
 database_name = "shio-jikyu-push"
-database_id = "REPLACE_AFTER_D1_CREATE"
+database_id = "4bf59e88-d187-4d19-a229-68ab7acf02c9"
 
 [vars]
 VAPID_PUBLIC_KEY = "BC9vja_mNqF5bUiE-F33JMw8LrZAvl10K5I7hM8DQqo_j8YiHBmBPywX4jeVmiJ2QMkI1SUgc99qooN1SOst1k0"
