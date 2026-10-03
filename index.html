@@ -314,10 +314,19 @@
   <button class="close" data-close>×</button>
   <h2>しおや（天日塩の道具）</h2>
   <div id="shopList"></div>
+  <h2 style="margin-top:18px">🔔 お知らせ</h2>
+  <div class="shop-item"><div class="info" id="notifyInfo"></div><button class="btn" id="notifyBtn"></button></div>
   <button class="reset" id="reset">データをリセット</button>
 </div></div>
 
 <div class="modal" id="bucketModal"><div class="panel" id="bucketPanel"></div></div>
+
+<div class="modal" id="notifyModal"><div class="panel teru-ask">
+  <div style="font-size:56px">🔔</div>
+  <h2>お知らせを受け取る？</h2>
+  <p>アプリを閉じているあいだに、<br>海水がなくなったときや、塩がしけそうなときに<br>しおじいさんが教えてくれるよ。</p>
+  <div class="row"><button class="btn" id="notifyLater">あとで</button><button class="btn yes" id="notifyYes">受け取る！</button></div>
+</div></div>
 
 <div class="modal" id="jpModal"><div class="panel jp-panel" id="jpPanel"></div></div>
 
@@ -339,7 +348,7 @@ const TYPES = [
   { id: 'mo', name: '藻塩', w: 8, sp: 5, g: 12, rank: 2, colors: ['#efe0c4', '#dcc59c', '#c2a878'], face: 'normal', grains: true,
     desc: '海藻のうまみをまとった塩。ちょっと磯くさいのが自慢。',
     mame: '海藻に海水をかけては干す。藻塩は、日本でとても古くから続く塩づくりの方法なんだ。' },
-  { id: 'yuki', name: '雪塩', w: 6, sp: 8, g: 10, rank: 3, colors: ['#ffffff', '#f4fbff', '#e2f1fb'], face: 'happy', snow: true,
+  { id: 'yuki', name: 'こなゆき塩', w: 6, sp: 8, g: 10, rank: 3, colors: ['#ffffff', '#f4fbff', '#e2f1fb'], face: 'happy', snow: true,
     desc: 'パウダーみたいにふわふわ。強くなでると消える。',
     mame: '日本各地の海辺には、その土地ならではの塩づくりが今も残っているよ。' },
   { id: 'herb', name: 'ハーブソルト', w: 4, sp: 10, g: 10, rank: 3, colors: ['#eef5e2', '#d3e6b8', '#b4cf92'], face: 'happy', grains: '#6a9a3a',
@@ -379,7 +388,7 @@ const TYPES = [
     mame: '塩から「苛性ソーダ」と「塩素」がつくられる。日本で使う塩の約75%が、こうした工業用なんだ。' },
   { id: 'glass', lv: 2, name: 'ガラス塩', w: 6, sp: 18, g: 10, rank: 3, colors: ['#f4fbfd', '#dff1f6', '#bfe1ea'], face: 'happy', acc: '🪟',
     desc: 'すきとおった心をもつ塩。まどガラスになるのが目標。',
-    mame: 'ガラスの原料の「ソーダ灰」も、塩からつくられているよ。' },
+    mame: 'ガラスの原料の「ソーダ灰」は、塩からつくることができるんだ。' },
   { id: 'sekken', lv: 2, name: 'せっけん塩', w: 5, sp: 18, g: 10, rank: 3, colors: ['#fdf0f6', '#f6d9e8', '#e8bcd3'], face: 'happy', acc: '🫧',
     desc: 'いつも いいにおいの塩。さわるとちょっとあわだつ。',
     mame: 'せっけんをつくるのにも、塩からできた苛性ソーダが使われるんだ。' },
@@ -398,7 +407,7 @@ const TYPES = [
     mame: 'オーストラリアは雨が少なく、晴れの日が多い。天日塩づくりにぴったりなんだ。' },
   { id: 'niji', lv: 3, name: 'にじいろ塩', w: 0.6, sp: 300, g: 40, rank: 5, colors: ['#ffd6e0', '#d6f0ff', '#e6ffd6'], face: 'happy', shine: true, acc: '🌈',
     desc: '太陽と風と海が、ぜんぶそろったときにだけ生まれる塩。',
-    mame: '太陽と風だけでつくる天日塩は、燃料も電気もいらない。地球にやさしい塩づくりなんだ。' },
+    mame: '太陽と風の力でつくる天日塩は、燃料も電気もほとんどいらない。地球にやさしい塩づくりなんだ。' },
   { id: 'damp', name: 'しけった塩', w: 0, sp: 1, g: 4, rank: 2, colors: ['#e3edf2', '#c8d8e2', '#a9bfcc'], face: 'droopy',
     desc: '放っておかれて湿気てしまった塩。早く収穫してあげよう。',
     mame: '塩は空気中の水分を吸いやすいんだ。育ったら、しける前に収穫してあげよう。' },
@@ -549,7 +558,7 @@ const CHAPTERS = [
   { title: '第4話　風の力', goal: '「しおや」で枝条架をつくろう', prog: () => [state.up.shijoka, 1], reward: { sp: 40 },
     intro: [
       ['jii', '晴れると気持ちがいいのう！'],
-      ['jii', 'お日さまと風だけでつくる塩は、燃料も電気もいらん。\n地球にやさしい塩なんじゃ。'],
+      ['jii', 'お日さまと風の力でつくる塩は、燃料も電気も ほとんどいらん。\n地球にやさしい塩なんじゃ。'],
       ['jii', '次は 風の力も借りてみよう。\n「しおや」で、昔の道具「枝条架（しじょうか）」をつくるんじゃ。'],
     ] },
   { title: '第5話　半分じまん', goal: 'わが家の自給率を50%にしよう', prog: () => [pct(), 50], unit: '%', reward: { sp: 60, teru: 2 },
@@ -699,8 +708,8 @@ const isWet = now => now < state.wetUntil;
 const weatherNow = now => teruActive(now) ? 'sun' : weatherAt(now);
 
 // 時間を進める（留守のあいだの分も、天気・てるてる坊主ごとに区切って計算）
-function advance(to) {
-  let t = Math.max(state.lastTick, to - MAX_OFFLINE);
+function runTime(from, to, stopWhen) {
+  let t = from;
   while (t < to) {
     let end = Math.min((Math.floor(t / W_PERIOD) + 1) * W_PERIOD, to);
     const teru = teruActive(t), wet = isWet(t);
@@ -708,7 +717,12 @@ function advance(to) {
     if (wet) end = Math.min(end, state.wetUntil);
     step(teru ? 'sun' : weatherAt(t), end - t, teru ? TERU_BOOST : 1, wet);
     t = end;
+    if (stopWhen && stopWhen()) return t;
   }
+  return null;
+}
+function advance(to) {
+  runTime(Math.max(state.lastTick, to - MAX_OFFLINE), to);
   state.lastTick = to;
 }
 function step(w, dt, boost, wet) {
@@ -918,6 +932,11 @@ function splash(bucket, useTeru) {
   }
   sound(300, 120, 0.35, 'triangle');
   tick();
+  // はじめて海水をまいたあとに、一度だけお知らせをすすめる
+  if (!state.flags.askedNotify && pushSupported() && !state.notify) {
+    state.flags.askedNotify = true; save();
+    setTimeout(() => { if (!scene) openModal('notifyModal'); }, 1800);
+  }
 }
 $('sea').addEventListener('pointerdown', askBucket);
 
@@ -1182,6 +1201,7 @@ function renderDex() {
 }
 
 function renderShop() {
+  renderNotify();
   $('shopList').innerHTML = UPGRADES.map(u => {
     const lv = state.up[u.id], maxed = lv >= u.max, cost = u.cost(lv);
     return `<div class="shop-item"><div class="info"><b>${u.name}</b> Lv.${lv}${maxed ? ' (MAX)' : ''}<br>${u.desc}</div>
@@ -1229,7 +1249,7 @@ function renderJp() {
     <div class="callout">
       国内でつくる塩のほとんどは、<b>電気の力</b>で海水を濃くする方法（イオン交換膜法）でつくられているよ。<br><br>
       いっぽう、外国から来る塩の多くは<b>太陽と風の力だけ</b>でつくる天日塩。<br>
-      燃料も電気もいらない天日塩を、海に囲まれた日本で もっとつくれたら…？ ☀️🌬️
+      燃料も電気もほとんどいらない天日塩を、海に囲まれた日本で もっとつくれたら…？ ☀️🌬️
     </div>
 
     <h3>集めたまめ知識（${tipKeys.filter(k => state.tips[k]).length}/${tipKeys.length}）</h3>
@@ -1268,13 +1288,113 @@ function showNew() {
   sound(780, 1560, 0.3);
 }
 
+// ---------- お知らせ（プッシュ通知） ----------
+// アプリを閉じるときに「この先いつ何が起きるか」を計算してサーバーに予約し、
+// アプリを開いたら予約を取り消す（遊んでいる最中には通知しない）。
+const PUSH_SERVER = 'https://shio-jikyu-push.REPLACE.workers.dev';
+const VAPID_PUBLIC = 'BC9vja_mNqF5bUiE-F33JMw8LrZAvl10K5I7hM8DQqo_j8YiHBmBPywX4jeVmiJ2QMkI1SUgc99qooN1SOst1k0';
+const DAMP_WARN = 5 * 60_000;   // しける何分前に知らせるか
+let pushSub = null;
+
+const pushSupported = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window && location.protocol.startsWith('http');
+const isIOS = () => /iPhone|iPad|iPod/.test(navigator.userAgent);
+
+function predictNotices(now) {
+  const items = [];
+  if (state.wetUntil > now) items.push({ tag: 'dry', at: state.wetUntil,
+    title: '🌊 海水がなくなったよ', body: '砂浜がかわいたみたい。また海水をまいて、塩を育てよう！' });
+
+  // ゲームの続きを先回りして計算し、最初に塩がしけそうになる時刻を探す
+  const real = state;
+  state = structuredClone(real);
+  try {
+    const at = runTime(now, now + 24 * HOUR, () =>
+      state.salts.some(s => !s.tr && s.prog >= GROW && s.ready >= DAMP_AFTER - DAMP_WARN));
+    if (at) items.push({ tag: 'damp', at,
+      title: '💧 塩がしけそう！', body: '育った塩が、もうすぐしけちゃうよ。早く収穫してあげて！' });
+  } finally { state = real; }
+
+  const t = state.teru;
+  if (state.chapter >= 2 && t.count < TERU_MAX) items.push({ tag: 'teru',
+    at: (t.regenAt || now + TERU_REGEN) + (TERU_MAX - t.count - 1) * TERU_REGEN,
+    title: '☀️ てるてる坊主が満タン！', body: 'てるてる坊主が3こ そろったよ。晴れにして、塩をぐんぐん育てよう！' });
+  return items;
+}
+
+function sendSchedule(items) {
+  if (!state.notify || !pushSub) return;
+  fetch(PUSH_SERVER + '/schedule', {
+    method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ subscription: pushSub.toJSON(), items }),
+  }).catch(() => {});
+}
+
+async function enableNotify() {
+  if (!pushSupported()) return renderNotify();
+  try {
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted') { state.notify = false; save(); return renderNotify(); }
+    const reg = await navigator.serviceWorker.ready;
+    pushSub = await reg.pushManager.getSubscription() || await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: Uint8Array.from(atob(VAPID_PUBLIC.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0)),
+    });
+    state.notify = true; save();
+    sound(780, 1560, 0.3);
+  } catch (e) {
+    console.warn(e);
+    state.notify = false; save();
+  }
+  renderNotify();
+}
+async function disableNotify() {
+  state.notify = false; save();
+  if (pushSub) {
+    fetch(PUSH_SERVER + '/unsubscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ endpoint: pushSub.endpoint }) }).catch(() => {});
+    try { await pushSub.unsubscribe(); } catch {}
+    pushSub = null;
+  }
+  renderNotify();
+}
+
+function renderNotify() {
+  const btn = $('notifyBtn'), info = $('notifyInfo');
+  btn.disabled = false;
+  if (!pushSupported()) {
+    info.innerHTML = isIOS()
+      ? '<b>ホーム画面に追加すると使えるよ</b><br>Safariの共有ボタン →「ホーム画面に追加」から開いてね。'
+      : '<b>このブラウザでは使えないよ</b>';
+    btn.textContent = '—'; btn.disabled = true; return;
+  }
+  if (Notification.permission === 'denied') {
+    info.innerHTML = '<b>通知がブロックされているよ</b><br>スマホの設定から、このアプリの通知を許可してね。';
+    btn.textContent = '—'; btn.disabled = true; return;
+  }
+  info.innerHTML = '<b>' + (state.notify ? 'オン' : 'オフ') + '</b><br>海水がなくなった・塩がしけそう・てるてる坊主が満タンのときに、お知らせするよ。';
+  btn.textContent = state.notify ? 'オフにする' : 'オンにする';
+  btn.onclick = () => state.notify ? disableNotify() : enableNotify();
+}
+$('notifyYes').onclick = () => { $('notifyModal').classList.remove('open'); enableNotify(); };
+$('notifyLater').onclick = () => $('notifyModal').classList.remove('open');
+
 tick();
 setInterval(tick, 500);
-// アプリから戻ってきたら、すぐ留守中のぶんを進める
-document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    advance(Date.now()); save();
+    sendSchedule(predictNotices(Date.now()));
+  } else {
+    // アプリに戻ってきたら、すぐ留守中のぶんを進めて、予約は取り消す
+    tick();
+    sendSchedule([]);
+  }
+});
 
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
+  navigator.serviceWorker.register('sw.js').then(async reg => {
+    if ('PushManager' in window) pushSub = await reg.pushManager.getSubscription();
+    if (state.notify && !pushSub) { state.notify = false; save(); }
+  }).catch(() => {});
 }
 </script>
 </body>

@@ -1,0 +1,16 @@
+name = "shio-jikyu-push"
+main = "src/index.js"
+compatibility_date = "2025-06-01"
+
+[triggers]
+crons = ["* * * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "shio-jikyu-push"
+database_id = "REPLACE_AFTER_D1_CREATE"
+
+[vars]
+VAPID_PUBLIC_KEY = "BC9vja_mNqF5bUiE-F33JMw8LrZAvl10K5I7hM8DQqo_j8YiHBmBPywX4jeVmiJ2QMkI1SUgc99qooN1SOst1k0"
+VAPID_SUBJECT = "https://marina-0731.github.io/shio-jikyu-seikatsu/"
+ALLOWED_ORIGINS = "https://marina-0731.github.io,http://localhost:8765"
